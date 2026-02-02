@@ -2,13 +2,23 @@
 
 import { GraduationCap, Mail, Lock, User, ArrowRight } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 
 export default function Page() {
   const [isSignUp, setIsSignUp] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
   
   const handleSubmit = (e) => {
     e.preventDefault()
+    setIsLoading(true)
+    
+    // Simulate authentication delay
+    setTimeout(() => {
+      setIsLoading(false)
+      router.push("/homepage")
+    }, 1000)
   }
 
   return (
@@ -18,12 +28,12 @@ export default function Page() {
       <div className="bg-slate-900 text-white flex flex-col justify-center px-8 lg:px-16">
         <div className="max-w-lg">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0">
               <GraduationCap className="text-white w-7 h-7" />
             </div>
             <div>
               <h1 className="text-lg lg:text-xl font-bold leading-snug">Shri Guru Gobind Singhji Institute of Engineering and Technology</h1>
-              <p className="text-sm text-gray-400 mt-0.5">TPO Cell</p>
+              <p className="text-sm text-gray-400 mt-0.5">TPO Cell SGGSIE&T</p>
             </div>
           </div>
 
@@ -84,7 +94,7 @@ export default function Page() {
                 </label>
                 <input
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Enter your full name"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
@@ -96,7 +106,7 @@ export default function Page() {
               </label>
               <input
                 type="email"
-                placeholder="student@college.edu"
+                placeholder="student@gmail.com"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -107,40 +117,29 @@ export default function Page() {
               </label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
-            {/* Confirm password - only for signup */}
-            {isSignUp && (
-              <div>
-                <label className="text-sm font-medium flex items-center gap-2 mb-1">
-                  <Lock className="w-4 h-4" /> Confirm Password
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            )}
-
-            {/* Forgot password link - only for login */}
-            {!isSignUp && (
-              <div className="text-right">
-                <a href="#" className="text-sm text-indigo-600 hover:text-indigo-700">
-                  Forgot password?
-                </a>
-              </div>
-            )}
+           
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium py-2.5 rounded-lg transition flex items-center justify-center gap-2"
             >
-              {isSignUp ? "Create Account" : "Login"} 
-              <ArrowRight className="w-4 h-4" />
+              {isLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  {isSignUp ? "Creating Account..." : "Signing In..."}
+                </>
+              ) : (
+                <>
+                  {isSignUp ? "Create Account" : "Login"} 
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
