@@ -17,7 +17,7 @@ export default function Page() {
     // Simulate authentication delay
     setTimeout(() => {
       setIsLoading(false)
-      router.push("/homepage")
+      router.push("/dashboard")
     }, 1000)
   }
 
