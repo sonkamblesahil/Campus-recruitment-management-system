@@ -16,7 +16,7 @@ const navItems = [
   { href: "/jobs", label: "Job Postings", icon: BriefcaseIcon },
   { href: "/applications", label: "Applications", icon: DocumentTextIcon },
   { href: "/offers", label: "Offers", icon: GiftIcon },
-  { href: "/analytics", label: "Analytics", icon: ChartBarIcon },
+  { href: "/analytics", label: "Placement Analytics", icon: ChartBarIcon },
   { href: "/profile", label: "Profile", icon: UserIcon }, // 👈 Added Profile
 ];
 
