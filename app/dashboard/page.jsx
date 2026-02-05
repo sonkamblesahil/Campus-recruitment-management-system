@@ -165,6 +165,52 @@ export default function DashBoardPage() {
               </p>
               <span className="text-xs text-zinc-400">1 day ago</span>
             </div>
+            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+              <p className="text-sm font-semibold text-zinc-700">
+                Application Deadline
+              </p>
+              <p className="text-xs text-zinc-500">
+                UX Designer applications close in 2 days
+              </p>
+              <span className="text-xs text-zinc-400">1 day ago</span>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+              <p className="text-sm font-semibold text-zinc-700">
+                Application Deadline
+              </p>
+              <p className="text-xs text-zinc-500">
+                UX Designer applications close in 2 days
+              </p>
+              <span className="text-xs text-zinc-400">1 day ago</span>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+              <p className="text-sm font-semibold text-zinc-700">
+                Application Deadline
+              </p>
+              <p className="text-xs text-zinc-500">
+                UX Designer applications close in 2 days
+              </p>
+              <span className="text-xs text-zinc-400">1 day ago</span>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+              <p className="text-sm font-semibold text-zinc-700">
+                Application Deadline
+              </p>
+              <p className="text-xs text-zinc-500">
+                UX Designer applications close in 2 days
+              </p>
+              <span className="text-xs text-zinc-400">1 day ago</span>
+            </div>
+
+            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+              <p className="text-sm font-semibold text-zinc-700">
+                Application Deadline
+              </p>
+              <p className="text-xs text-zinc-500">
+                UX Designer applications close in 2 days
+              </p>
+              <span className="text-xs text-zinc-400">1 day ago</span>
+            </div>
           </div>
         </div>
       </div>
