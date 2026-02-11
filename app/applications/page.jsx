@@ -20,7 +20,7 @@ export default function Applications() {
       <h1 className="text-zinc-600 text-base font-bold">Your Applications</h1>
       <div className='h-[82vh] rounded-2xl flex items-center justify-center bg-white mt-2 overflow-hidden'>
         <div className='w-full h-full p-4 overflow-x-auto'>
-          <table className='w-full min-w-[400px] text-left' role="table">
+          <table className='w-full min-w-100 text-left' role="table">
             <thead>
               <tr>
                 <th className='border-b-2 border-gray-300 p-2' role="columnheader">Company</th>
