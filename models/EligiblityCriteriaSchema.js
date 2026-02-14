@@ -30,6 +30,11 @@ const eligibilityCriteriaSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    year_gaps:{
+        type:Number,
+        default:0,
+        required:true
+    }   
   },
   { _id: false }
 );
