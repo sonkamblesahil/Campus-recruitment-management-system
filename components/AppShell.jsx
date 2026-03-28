@@ -1,19 +1,47 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Navbar from "./NavBar";
 import SideBar from "./SideBar";
 
+const subscribe = () => () => {};
+const getServerSnapshot = () => false;
+const getClientSnapshot = () => Boolean(localStorage.getItem("auth_user"));
+
 export default function AppShell({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isAuthPage = pathname === "/" || pathname.startsWith("/auth");
+  const isAuthenticated = useSyncExternalStore(
+    subscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
+
+  useEffect(() => {
+    if (!isAuthPage && !isAuthenticated) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    if (isAuthPage && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthPage, isAuthenticated, router]);
 
   // Auth pages: no navbar / sidebar
   if (isAuthPage) {
+    if (isAuthenticated) {
+      return null;
+    }
     return <main className="flex-1">{children}</main>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

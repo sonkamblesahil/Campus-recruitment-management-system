@@ -1,7 +1,6 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { signoutAction } from "@/app/auth/actions";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -104,11 +103,17 @@ export default function NavBar({ onMenuClick }) {
                 className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-red-400"
                 role="menuitem"
               >
-                <form action={signoutAction}>
-                  <button type="submit" className="w-full text-left">
-                    Logout
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    localStorage.removeItem("auth_user");
+                    router.push("/auth/login");
+                  }}
+                  className="w-full text-left"
+                >
+                  Logout
+                </button>
               </li>
             </ul>
           </div>

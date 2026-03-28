@@ -1,10 +1,39 @@
+"use client";
+
 import { ArrowRight, GraduationCap, Lock, Mail } from "lucide-react";
 import { loginAction } from "../actions";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default async function LoginPage({ searchParams }) {
-  const params = await searchParams;
-  const error = params?.error;
+export default function LoginPage() {
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (formData) => {
+    setError("");
+    setIsLoading(true);
+
+    const result = await loginAction(formData);
+
+    if (!result?.success) {
+      setError(result?.error || "Login failed");
+      setIsLoading(false);
+      return;
+    }
+
+    localStorage.setItem(
+      "auth_user",
+      JSON.stringify({
+        userId: result.userId,
+        name: result.name,
+        email: result.email,
+      }),
+    );
+
+    router.push("/dashboard");
+  };
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
@@ -45,7 +74,7 @@ export default async function LoginPage({ searchParams }) {
             </p>
           )}
 
-          <form className="space-y-4" action={loginAction}>
+          <form className="space-y-4" action={handleSubmit}>
             <div>
               <label className="text-sm font-medium flex items-center gap-2 mb-1">
                 <Mail className="w-4 h-4" /> Email
@@ -74,10 +103,11 @@ export default async function LoginPage({ searchParams }) {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 transition flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium py-2.5 transition flex items-center justify-center gap-2"
             >
-              Login
-              <ArrowRight className="w-4 h-4" />
+              {isLoading ? "Signing In..." : "Login"}
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
 
