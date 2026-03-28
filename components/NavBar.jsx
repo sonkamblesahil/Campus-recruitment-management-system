@@ -108,7 +108,7 @@ export default function NavBar({ onMenuClick }) {
                   onClick={() => {
                     setIsDropdownOpen(false);
                     localStorage.removeItem("auth_user");
-                    router.push("/auth/login");
+                    router.push("/login");
                   }}
                   className="w-full text-left"
                 >

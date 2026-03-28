@@ -14,7 +14,8 @@ export default function AppShell({ children }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const isAuthPage = pathname === "/" || pathname.startsWith("/auth");
+  const isAuthPage =
+    pathname === "/" || pathname === "/login" || pathname === "/signup";
   const isAuthenticated = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -23,7 +24,7 @@ export default function AppShell({ children }) {
 
   useEffect(() => {
     if (!isAuthPage && !isAuthenticated) {
-      router.replace("/auth/login");
+      router.replace("/login");
       return;
     }
 
