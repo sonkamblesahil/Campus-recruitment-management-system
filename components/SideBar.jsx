@@ -1,14 +1,15 @@
+"use client";
+
 import Link from "next/link";
-import { 
-  HomeIcon, 
-  UserGroupIcon, 
-  BriefcaseIcon, 
-  DocumentTextIcon, 
-  CalendarIcon, 
-  GiftIcon, 
+import { usePathname } from "next/navigation";
+import {
+  AcademicCapIcon,
+  HomeIcon,
+  BriefcaseIcon,
+  DocumentTextIcon,
+  GiftIcon,
   ChartBarIcon,
-  CogIcon,
-  UserIcon 
+  UserIcon,
 } from "@heroicons/react/24/outline";
 
 const navItems = [
@@ -21,38 +22,35 @@ const navItems = [
 ];
 
 export default function SideBar() {
-  return (
-    <nav className="h-full bg-gray-900 text-white shadow-2xl border-r border-gray-700 flex flex-col">
-      
+  const pathname = usePathname();
 
+  return (
+    <nav className="h-full bg-gray-900/95 md:group-hover/sidebar:bg-gray-900/60 backdrop-blur-md text-white shadow-2xl flex flex-col transition-colors duration-300">
+  
       {/* Navigation */}
-      <ul className="flex-1 p-4 space-y-1">
+      <ul className="flex-1 p-3 space-y-4 mt-10">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="group flex items-center rounded-xl p-3 text-gray-300 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out hover:shadow-md hover:scale-[1.02] active:bg-white/20 active:scale-95"
+                className={`group flex items-center justify-center md:justify-start rounded-xl p-3 transition-all duration-200 ease-in-out active:bg-white/20 ${
+                  pathname === item.href
+                    ? "bg-white text-gray-900"
+                    : "text-gray-300 hover:bg-white/15 hover:text-white"
+                }`}
+                title={item.label}
               >
-                <Icon className="h-5 w-5 mr-3 opacity-70 group-hover:opacity-100 transition-opacity" />
-                <span className="font-medium">{item.label}</span>
+                <Icon className="h-5 w-5 shrink-0 md:mr-0 md:group-hover/sidebar:mr-3 opacity-80 group-hover:opacity-100 transition-all duration-200" />
+                <span className="font-medium whitespace-nowrap opacity-100 md:opacity-0 md:translate-x-2 md:group-hover/sidebar:opacity-100 md:group-hover/sidebar:translate-x-0 transition-all duration-200">
+                  {item.label}
+                </span>
               </Link>
             </li>
           );
         })}
       </ul>
-
-      {/* Footer actions */}
-      <div className="p-4 pt-2 border-t border-gray-700">
-        <Link
-          href="/settings"
-          className="group flex items-center rounded-xl p-3 text-gray-300 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out hover:shadow-md hover:scale-[1.02] active:bg-white/20 active:scale-95"
-        >
-          <CogIcon className="h-5 w-5 mr-3 opacity-70 group-hover:opacity-100 transition-opacity" />
-          <span className="font-medium">Settings</span>
-        </Link>
-      </div>
     </nav>
   );
 }

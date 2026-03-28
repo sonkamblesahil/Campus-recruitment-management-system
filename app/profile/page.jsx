@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 /* -------------------- UI HELPERS -------------------- */
 
@@ -21,10 +21,10 @@ const Row = ({ label, value, editable, onChange }) => (
       <input
         className="col-span-3 border rounded px-3 py-1.5"
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
       />
     ) : (
-      <span className="col-span-3">{value || '-'}</span>
+      <span className="col-span-3">{value || "-"}</span>
     )}
   </div>
 );
@@ -46,72 +46,72 @@ const Block = ({ children, onRemove, editable }) => (
 /* -------------------- MAIN -------------------- */
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState("basic");
   const [edit, setEdit] = useState(false);
 
   const [data, setData] = useState({
     basic: {
-      name: 'John Doe',
-      email: 'john@email.com',
-      phone: '+91 9876543210',
-      address: 'Mumbai, India',
+      name: "John Doe",
+      email: "john@email.com",
+      phone: "+91 9876543210",
+      address: "Mumbai, India",
     },
 
     academic: {
-      college: 'IIT Bombay',
-      department: 'Computer Science',
-      cgpa: '8.9',
-      batch: '2021–2025',
+      college: "IIT Bombay",
+      department: "Computer Science",
+      cgpa: "8.9",
+      batch: "2021–2025",
     },
 
     education: [
       {
-        degree: 'B.Tech',
-        institute: 'IIT Bombay',
-        duration: '2021–2025',
-        score: 'CGPA 8.9',
+        degree: "B.Tech",
+        institute: "IIT Bombay",
+        duration: "2021–2025",
+        score: "CGPA 8.9",
       },
     ],
 
     experience: [
       {
-        role: 'Software Engineer Intern',
-        org: 'Google',
-        duration: 'May 2024 – Aug 2024',
-        description: 'Worked on internal dashboards.',
+        role: "Software Engineer Intern",
+        org: "Google",
+        duration: "May 2024 – Aug 2024",
+        description: "Worked on internal dashboards.",
       },
     ],
 
     projects: [
       {
-        title: 'E-Commerce Platform',
-        tech: 'React, Node.js',
-        github: 'https://github.com/johndoe/ecommerce',
-        live: '',
+        title: "E-Commerce Platform",
+        tech: "React, Node.js",
+        github: "https://github.com/johndoe/ecommerce",
+        live: "",
       },
     ],
 
-    skills: ['React', 'Node.js', 'Python'],
+    skills: ["React", "Node.js", "Python"],
   });
 
   /* -------------------- HELPERS -------------------- */
 
   const updateField = (section, field, value) => {
-    setData(d => ({ ...d, [section]: { ...d[section], [field]: value } }));
+    setData((d) => ({ ...d, [section]: { ...d[section], [field]: value } }));
   };
 
   const updateArrayItem = (section, i, field, value) => {
     const copy = [...data[section]];
     copy[i][field] = value;
-    setData(d => ({ ...d, [section]: copy }));
+    setData((d) => ({ ...d, [section]: copy }));
   };
 
   const addArrayItem = (section, template) => {
-    setData(d => ({ ...d, [section]: [...d[section], template] }));
+    setData((d) => ({ ...d, [section]: [...d[section], template] }));
   };
 
   const removeArrayItem = (section, i) => {
-    setData(d => ({
+    setData((d) => ({
       ...d,
       [section]: d[section].filter((_, idx) => idx !== i),
     }));
@@ -120,12 +120,12 @@ export default function ProfilePage() {
   /* -------------------- TABS -------------------- */
 
   const tabs = [
-    { id: 'basic', label: 'Basic Details' },
-    { id: 'academic', label: 'Academic Details' },
-    { id: 'education', label: 'Education Details' },
-    { id: 'experience', label: 'Internship & Work Ex' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'skills', label: 'Skills' },
+    { id: "basic", label: "Basic Details" },
+    { id: "academic", label: "Academic Details" },
+    { id: "education", label: "Education Details" },
+    { id: "experience", label: "Internship & Work Ex" },
+    { id: "projects", label: "Projects" },
+    { id: "skills", label: "Skills" },
   ];
 
   /* -------------------- CONTENT -------------------- */
@@ -133,63 +133,113 @@ export default function ProfilePage() {
   const content = {
     basic: (
       <Section title="Basic Details">
-        <Row label="Name" value={data.basic.name} editable={edit}
-          onChange={v => updateField('basic', 'name', v)} />
-        <Row label="Email" value={data.basic.email} editable={edit}
-          onChange={v => updateField('basic', 'email', v)} />
-        <Row label="Phone" value={data.basic.phone} editable={edit}
-          onChange={v => updateField('basic', 'phone', v)} />
-        <Row label="Address" value={data.basic.address} editable={edit}
-          onChange={v => updateField('basic', 'address', v)} />
+        <Row
+          label="Name"
+          value={data.basic.name}
+          editable={edit}
+          onChange={(v) => updateField("basic", "name", v)}
+        />
+        <Row
+          label="Email"
+          value={data.basic.email}
+          editable={edit}
+          onChange={(v) => updateField("basic", "email", v)}
+        />
+        <Row
+          label="Phone"
+          value={data.basic.phone}
+          editable={edit}
+          onChange={(v) => updateField("basic", "phone", v)}
+        />
+        <Row
+          label="Address"
+          value={data.basic.address}
+          editable={edit}
+          onChange={(v) => updateField("basic", "address", v)}
+        />
       </Section>
     ),
 
     academic: (
       <Section title="Academic Details">
-        <Row label="College" value={data.academic.college} editable={edit}
-          onChange={v => updateField('academic', 'college', v)} />
-        <Row label="Department" value={data.academic.department} editable={edit}
-          onChange={v => updateField('academic', 'department', v)} />
-        <Row label="Batch" value={data.academic.batch} editable={edit}
-          onChange={v => updateField('academic', 'batch', v)} />
-        <Row label="CGPA" value={data.academic.cgpa} editable={edit}
-          onChange={v => updateField('academic', 'cgpa', v)} />
+        <Row
+          label="College"
+          value={data.academic.college}
+          editable={edit}
+          onChange={(v) => updateField("academic", "college", v)}
+        />
+        <Row
+          label="Department"
+          value={data.academic.department}
+          editable={edit}
+          onChange={(v) => updateField("academic", "department", v)}
+        />
+        <Row
+          label="Batch"
+          value={data.academic.batch}
+          editable={edit}
+          onChange={(v) => updateField("academic", "batch", v)}
+        />
+        <Row
+          label="CGPA"
+          value={data.academic.cgpa}
+          editable={edit}
+          onChange={(v) => updateField("academic", "cgpa", v)}
+        />
       </Section>
     ),
 
     education: (
       <Section
         title="Education Details"
-        action={edit && (
-          <button
-            onClick={() =>
-              addArrayItem('education', {
-                degree: '',
-                institute: '',
-                duration: '',
-                score: '',
-              })
-            }
-            className="text-sm text-green-600"
-          >
-            + Add
-          </button>
-        )}
+        action={
+          edit && (
+            <button
+              onClick={() =>
+                addArrayItem("education", {
+                  degree: "",
+                  institute: "",
+                  duration: "",
+                  score: "",
+                })
+              }
+              className="text-sm text-green-600"
+            >
+              + Add
+            </button>
+          )
+        }
       >
         {data.education.map((e, i) => (
           <Block
             key={i}
             editable={edit}
-            onRemove={() => removeArrayItem('education', i)}
+            onRemove={() => removeArrayItem("education", i)}
           >
-            <Row label="Degree" value={e.degree} editable={edit}
-              onChange={v => updateArrayItem('education', i, 'degree', v)} />
-            <Row label="Institute" value={e.institute} editable={edit}
-              onChange={v => updateArrayItem('education', i, 'institute', v)} />
-            <Row label="Duration" value={e.duration} editable={edit}
-              onChange={v => updateArrayItem('education', i, 'duration', v)} />
-            <Row label="Score" value={e.score} editable={edit}
-              onChange={v => updateArrayItem('education', i, 'score', v)} />
+            <Row
+              label="Degree"
+              value={e.degree}
+              editable={edit}
+              onChange={(v) => updateArrayItem("education", i, "degree", v)}
+            />
+            <Row
+              label="Institute"
+              value={e.institute}
+              editable={edit}
+              onChange={(v) => updateArrayItem("education", i, "institute", v)}
+            />
+            <Row
+              label="Duration"
+              value={e.duration}
+              editable={edit}
+              onChange={(v) => updateArrayItem("education", i, "duration", v)}
+            />
+            <Row
+              label="Score"
+              value={e.score}
+              editable={edit}
+              onChange={(v) => updateArrayItem("education", i, "score", v)}
+            />
           </Block>
         ))}
       </Section>
@@ -198,36 +248,56 @@ export default function ProfilePage() {
     experience: (
       <Section
         title="Internship & Work Experience"
-        action={edit && (
-          <button
-            onClick={() =>
-              addArrayItem('experience', {
-                role: '',
-                org: '',
-                duration: '',
-                description: '',
-              })
-            }
-            className="text-sm text-green-600"
-          >
-            + Add
-          </button>
-        )}
+        action={
+          edit && (
+            <button
+              onClick={() =>
+                addArrayItem("experience", {
+                  role: "",
+                  org: "",
+                  duration: "",
+                  description: "",
+                })
+              }
+              className="text-sm text-green-600"
+            >
+              + Add
+            </button>
+          )
+        }
       >
         {data.experience.map((e, i) => (
           <Block
             key={i}
             editable={edit}
-            onRemove={() => removeArrayItem('experience', i)}
+            onRemove={() => removeArrayItem("experience", i)}
           >
-            <Row label="Role" value={e.role} editable={edit}
-              onChange={v => updateArrayItem('experience', i, 'role', v)} />
-            <Row label="Organization" value={e.org} editable={edit}
-              onChange={v => updateArrayItem('experience', i, 'org', v)} />
-            <Row label="Duration" value={e.duration} editable={edit}
-              onChange={v => updateArrayItem('experience', i, 'duration', v)} />
-            <Row label="Description" value={e.description} editable={edit}
-              onChange={v => updateArrayItem('experience', i, 'description', v)} />
+            <Row
+              label="Role"
+              value={e.role}
+              editable={edit}
+              onChange={(v) => updateArrayItem("experience", i, "role", v)}
+            />
+            <Row
+              label="Organization"
+              value={e.org}
+              editable={edit}
+              onChange={(v) => updateArrayItem("experience", i, "org", v)}
+            />
+            <Row
+              label="Duration"
+              value={e.duration}
+              editable={edit}
+              onChange={(v) => updateArrayItem("experience", i, "duration", v)}
+            />
+            <Row
+              label="Description"
+              value={e.description}
+              editable={edit}
+              onChange={(v) =>
+                updateArrayItem("experience", i, "description", v)
+              }
+            />
           </Block>
         ))}
       </Section>
@@ -236,36 +306,54 @@ export default function ProfilePage() {
     projects: (
       <Section
         title="Projects"
-        action={edit && (
-          <button
-            onClick={() =>
-              addArrayItem('projects', {
-                title: '',
-                tech: '',
-                github: '',
-                live: '',
-              })
-            }
-            className="text-sm text-green-600"
-          >
-            + Add
-          </button>
-        )}
+        action={
+          edit && (
+            <button
+              onClick={() =>
+                addArrayItem("projects", {
+                  title: "",
+                  tech: "",
+                  github: "",
+                  live: "",
+                })
+              }
+              className="text-sm text-green-600"
+            >
+              + Add
+            </button>
+          )
+        }
       >
         {data.projects.map((p, i) => (
           <Block
             key={i}
             editable={edit}
-            onRemove={() => removeArrayItem('projects', i)}
+            onRemove={() => removeArrayItem("projects", i)}
           >
-            <Row label="Title" value={p.title} editable={edit}
-              onChange={v => updateArrayItem('projects', i, 'title', v)} />
-            <Row label="Tech" value={p.tech} editable={edit}
-              onChange={v => updateArrayItem('projects', i, 'tech', v)} />
-            <Row label="GitHub" value={p.github} editable={edit}
-              onChange={v => updateArrayItem('projects', i, 'github', v)} />
-            <Row label="Live Link" value={p.live} editable={edit}
-              onChange={v => updateArrayItem('projects', i, 'live', v)} />
+            <Row
+              label="Title"
+              value={p.title}
+              editable={edit}
+              onChange={(v) => updateArrayItem("projects", i, "title", v)}
+            />
+            <Row
+              label="Tech"
+              value={p.tech}
+              editable={edit}
+              onChange={(v) => updateArrayItem("projects", i, "tech", v)}
+            />
+            <Row
+              label="GitHub"
+              value={p.github}
+              editable={edit}
+              onChange={(v) => updateArrayItem("projects", i, "github", v)}
+            />
+            <Row
+              label="Live Link"
+              value={p.live}
+              editable={edit}
+              onChange={(v) => updateArrayItem("projects", i, "live", v)}
+            />
           </Block>
         ))}
       </Section>
@@ -274,14 +362,18 @@ export default function ProfilePage() {
     skills: (
       <Section
         title="Skills"
-        action={edit && (
-          <button
-            onClick={() => setData(d => ({ ...d, skills: [...d.skills, ''] }))}
-            className="text-sm text-green-600"
-          >
-            + Add
-          </button>
-        )}
+        action={
+          edit && (
+            <button
+              onClick={() =>
+                setData((d) => ({ ...d, skills: [...d.skills, ""] }))
+              }
+              className="text-sm text-green-600"
+            >
+              + Add
+            </button>
+          )
+        }
       >
         {data.skills.map((s, i) => (
           <div key={i} className="flex gap-2 items-center">
@@ -289,10 +381,10 @@ export default function ProfilePage() {
               <input
                 className="border rounded px-3 py-1.5 text-sm flex-1"
                 value={s}
-                onChange={e => {
+                onChange={(e) => {
                   const copy = [...data.skills];
                   copy[i] = e.target.value;
-                  setData(d => ({ ...d, skills: copy }));
+                  setData((d) => ({ ...d, skills: copy }));
                 }}
               />
             ) : (
@@ -301,7 +393,7 @@ export default function ProfilePage() {
             {edit && (
               <button
                 onClick={() =>
-                  setData(d => ({
+                  setData((d) => ({
                     ...d,
                     skills: d.skills.filter((_, idx) => idx !== i),
                   }))
@@ -318,19 +410,21 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
-      <div className="bg-white rounded-xl h-[85vh] flex overflow-hidden">
-
+    <div className="bg-gray-200 h-full p-2">
+      <h1 className="text-zinc-600 text-base font-bold mb-2">
+        Welcome Sahil Sonkamble
+      </h1>
+      <div className="bg-white rounded-xl h-[82vh] flex overflow-hidden mt-2">
         {/* SIDEBAR */}
         <aside className="w-72 border-r bg-gray-50 p-3 space-y-1">
-          {tabs.map(t => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`w-full text-left px-4 py-3 text-sm rounded-lg ${
                 activeTab === t.id
-                  ? 'bg-indigo-50 text-indigo-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? "bg-indigo-50 text-indigo-700 font-medium"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
               {t.label}
@@ -345,12 +439,11 @@ export default function ProfilePage() {
               onClick={() => setEdit(!edit)}
               className="text-sm text-indigo-600"
             >
-              {edit ? 'Save' : 'Edit'}
+              {edit ? "Save" : "Edit"}
             </button>
           </div>
           {content[activeTab]}
         </main>
-
       </div>
     </div>
   );

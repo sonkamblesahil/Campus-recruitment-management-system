@@ -7,76 +7,16 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
-
     password: {
       type: String,
       required: true,
-    },
-
-    gender: {
-      type: String,
-      required: true,
-      enum: ["Male", "Female", "Other"],
-      default: "student",
-    },
-
-    phone: {
-      type: String,
-      required: true,
-    },
-
-    skills: {
-      type: [String],
-      default: [],
-    },
-
-    github: {
-      type: String,
-      default: "",
-    },
-
-    linkedin: {
-      type: String,
-      default: "",
-    },
-
-    address: {
-      firstLine: {
-        type: String,
-        default: "",
-      },
-      city: {
-        type: String,
-        default: "",
-      },
-      state: {
-        type: String,
-        default: "",
-      },
-      pincode: {
-        type: String,
-        default: "",
-      },
-    },
-
-
-    role: {
-      type: String,
-      required: true,
-      enum: ["student", "admin","coordinator"],
-      default: "student",
-    },
-
-    education: {
-      type: [educationSchema],
-      default: [],
     },
   },
   {
@@ -84,4 +24,6 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+export default User;

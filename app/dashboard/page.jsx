@@ -8,7 +8,7 @@ export default function DashBoardPage() {
       </h1>
 
       <div className="h-[82vh] gap-2 rounded-2xl flex   bg-gray-200 mt-2">
-        <div className="h-full bg-white w-2/3 rounded-xl p-4 overflow-y-auto">
+        <div className="h-full bg-white w-full rounded-xl p-4 overflow-y-auto">
           <h2 className="text-zinc-600 text-base font-bold mb-4">
             Student Placement Overview
           </h2>
@@ -115,104 +115,7 @@ export default function DashBoardPage() {
             </div>
           </div>
         </div>
-        <div className="h-full w-1/3 bg-white rounded-2xl">
-          <h1 className="text-zinc-600 text-base font-bold pl-2 pt-2 ">
-            Notifications
-          </h1>
-          <div className="p-2 space-y-2 overflow-y-auto max-h-[75vh]">
-            <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                New Application Received
-              </p>
-              <p className="text-xs text-zinc-500">
-                John Doe applied for Software Engineer position
-              </p>
-              <span className="text-xs text-zinc-400">2 minutes ago</span>
-            </div>
-            <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Interview Scheduled
-              </p>
-              <p className="text-xs text-zinc-500">
-                Interview with Sarah Smith confirmed for tomorrow
-              </p>
-              <span className="text-xs text-zinc-400">1 hour ago</span>
-            </div>
-            <div className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Offer Pending Response
-              </p>
-              <p className="text-xs text-zinc-500">
-                Awaiting response from Michael Johnson
-              </p>
-              <span className="text-xs text-zinc-400">3 hours ago</span>
-            </div>
-            <div className="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                New Job Posted
-              </p>
-              <p className="text-xs text-zinc-500">
-                Frontend Developer position is now live
-              </p>
-              <span className="text-xs text-zinc-400">5 hours ago</span>
-            </div>
-            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Application Deadline
-              </p>
-              <p className="text-xs text-zinc-500">
-                UX Designer applications close in 2 days
-              </p>
-              <span className="text-xs text-zinc-400">1 day ago</span>
-            </div>
-            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Application Deadline
-              </p>
-              <p className="text-xs text-zinc-500">
-                UX Designer applications close in 2 days
-              </p>
-              <span className="text-xs text-zinc-400">1 day ago</span>
-            </div>
-            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Application Deadline
-              </p>
-              <p className="text-xs text-zinc-500">
-                UX Designer applications close in 2 days
-              </p>
-              <span className="text-xs text-zinc-400">1 day ago</span>
-            </div>
-            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Application Deadline
-              </p>
-              <p className="text-xs text-zinc-500">
-                UX Designer applications close in 2 days
-              </p>
-              <span className="text-xs text-zinc-400">1 day ago</span>
-            </div>
-            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Application Deadline
-              </p>
-              <p className="text-xs text-zinc-500">
-                UX Designer applications close in 2 days
-              </p>
-              <span className="text-xs text-zinc-400">1 day ago</span>
-            </div>
-
-            <div className="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-              <p className="text-sm font-semibold text-zinc-700">
-                Application Deadline
-              </p>
-              <p className="text-xs text-zinc-500">
-                UX Designer applications close in 2 days
-              </p>
-              <span className="text-xs text-zinc-400">1 day ago</span>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );
