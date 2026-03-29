@@ -1,11 +1,28 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 
 export default function DashBoardPage() {
+  const [userName, setUserName] = useState("User");
+
+  useEffect(() => {
+    try {
+      const rawUser = localStorage.getItem("auth_user");
+      if (!rawUser) {
+        setUserName("User");
+        return;
+      }
+
+      const parsedUser = JSON.parse(rawUser);
+      setUserName(parsedUser?.name || "User");
+    } catch {
+      setUserName("User");
+    }
+  }, []);
+
   return (
     <div className="bg-gray-200 h-full p-2">
-      <h1 className="text-zinc-600 text-base font-bold">
-        Welcome Sahil Sonkamble
-      </h1>
+      <h1 className="text-zinc-600 text-base font-bold">Welcome {userName}</h1>
 
       <div className="h-[82vh] gap-2 rounded-2xl flex   bg-gray-200 mt-2">
         <div className="h-full bg-white w-full rounded-xl p-4 overflow-y-auto">
@@ -115,7 +132,6 @@ export default function DashBoardPage() {
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   );

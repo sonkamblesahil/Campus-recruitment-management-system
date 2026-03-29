@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 /* -------------------- UI HELPERS -------------------- */
 
@@ -48,6 +48,22 @@ const Block = ({ children, onRemove, editable }) => (
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("basic");
   const [edit, setEdit] = useState(false);
+  const [userName, setUserName] = useState("User");
+
+  useEffect(() => {
+    try {
+      const rawUser = localStorage.getItem("auth_user");
+      if (!rawUser) {
+        setUserName("User");
+        return;
+      }
+
+      const parsedUser = JSON.parse(rawUser);
+      setUserName(parsedUser?.name || "User");
+    } catch {
+      setUserName("User");
+    }
+  }, []);
 
   const [data, setData] = useState({
     basic: {
@@ -412,7 +428,7 @@ export default function ProfilePage() {
   return (
     <div className="bg-gray-200 h-full p-2">
       <h1 className="text-zinc-600 text-base font-bold mb-2">
-        Welcome Sahil Sonkamble
+        Welcome {userName}
       </h1>
       <div className="bg-white rounded-xl h-[82vh] flex overflow-hidden mt-2">
         {/* SIDEBAR */}

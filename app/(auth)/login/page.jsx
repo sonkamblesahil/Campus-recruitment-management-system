@@ -29,8 +29,10 @@ export default function LoginPage() {
         userId: result.userId,
         name: result.name,
         email: result.email,
+        role: result.role,
       }),
     );
+    window.dispatchEvent(new Event("auth-user-changed"));
 
     router.push("/dashboard");
   };
