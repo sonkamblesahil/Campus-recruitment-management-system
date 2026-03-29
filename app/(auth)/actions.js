@@ -9,9 +9,17 @@ export async function signupAction(formData) {
     .trim()
     .toLowerCase();
   const password = String(formData.get("password") || "").trim();
+  const role = String(formData.get("role") || "")
+    .trim()
+    .toLowerCase();
+  const allowedRoles = ["admin", "recruiter", "student"];
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !role) {
     return { success: false, error: "All fields are required" };
+  }
+
+  if (!allowedRoles.includes(role)) {
+    return { success: false, error: "Please select a valid user type" };
   }
 
   await connectToDatabase();
@@ -21,13 +29,14 @@ export async function signupAction(formData) {
     return { success: false, error: "Email already registered" };
   }
 
-  const user = await User.create({ name, email, password });
+  const user = await User.create({ name, email, password, role });
 
   return {
     success: true,
     userId: String(user._id),
     name: user.name,
     email: user.email,
+    role: user.role,
   };
 }
 
@@ -53,6 +62,7 @@ export async function loginAction(formData) {
     userId: String(user._id),
     name: user.name,
     email: user.email,
+    role: user.role,
   };
 }
 

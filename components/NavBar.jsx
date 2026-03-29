@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function NavBar({ onMenuClick }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [user, setUser] = useState({ name: "User", role: "Student" });
   const dropdownRef = useRef(null);
   const router = useRouter();
 
@@ -28,6 +29,35 @@ export default function NavBar({ onMenuClick }) {
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    const readUser = () => {
+      try {
+        const rawUser = localStorage.getItem("auth_user");
+        if (!rawUser) {
+          setUser({ name: "User", role: "Student" });
+          return;
+        }
+
+        const parsedUser = JSON.parse(rawUser);
+        setUser({
+          name: parsedUser?.name || "User",
+          role: parsedUser?.role || "student",
+        });
+      } catch {
+        setUser({ name: "User", role: "Student" });
+      }
+    };
+
+    readUser();
+    window.addEventListener("storage", readUser);
+    window.addEventListener("auth-user-changed", readUser);
+
+    return () => {
+      window.removeEventListener("storage", readUser);
+      window.removeEventListener("auth-user-changed", readUser);
     };
   }, []);
 
@@ -66,9 +96,11 @@ export default function NavBar({ onMenuClick }) {
           >
             <div className="text-right hidden sm:block">
               <p className="text-gray-300 text-sm font-medium leading-none">
-                Sahil Sonkamble
+                {user.name}
               </p>
-              <p className="text-xs text-gray-400">Student</p>
+              <p className="text-xs text-gray-400">
+                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </p>
             </div>
 
             {/* Avatar */}
@@ -108,6 +140,7 @@ export default function NavBar({ onMenuClick }) {
                   onClick={() => {
                     setIsDropdownOpen(false);
                     localStorage.removeItem("auth_user");
+                    window.dispatchEvent(new Event("auth-user-changed"));
                     router.push("/login");
                   }}
                   className="w-full text-left"

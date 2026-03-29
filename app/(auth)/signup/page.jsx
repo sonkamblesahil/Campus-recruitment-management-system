@@ -29,8 +29,10 @@ export default function SignupPage() {
         userId: result.userId,
         name: result.name,
         email: result.email,
+        role: result.role,
       }),
     );
+    window.dispatchEvent(new Event("auth-user-changed"));
 
     router.push("/dashboard");
   };
@@ -112,6 +114,22 @@ export default function SignupPage() {
                 className="w-full border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium flex items-center gap-2 mb-1">
+                <User className="w-4 h-4" /> User Type
+              </label>
+              <select
+                name="role"
+                defaultValue="student"
+                className="w-full border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              >
+                <option value="student">Student</option>
+                <option value="recruiter">Recruiter</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
 
             <button

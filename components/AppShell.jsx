@@ -5,7 +5,16 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import Navbar from "./NavBar";
 import SideBar from "./SideBar";
 
-const subscribe = () => () => {};
+const subscribe = (onStoreChange) => {
+  const handleChange = () => onStoreChange();
+  window.addEventListener("storage", handleChange);
+  window.addEventListener("auth-user-changed", handleChange);
+
+  return () => {
+    window.removeEventListener("storage", handleChange);
+    window.removeEventListener("auth-user-changed", handleChange);
+  };
+};
 const getServerSnapshot = () => false;
 const getClientSnapshot = () => Boolean(localStorage.getItem("auth_user"));
 
