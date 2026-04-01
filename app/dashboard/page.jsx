@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 export default function DashBoardPage() {
-  const [userName, setUserName] = useState("User");
+  const [userName] = useState(() => {
+    if (typeof window === "undefined") {
+      return "User";
+    }
 
-  useEffect(() => {
     try {
       const rawUser = localStorage.getItem("auth_user");
       if (!rawUser) {
-        setUserName("User");
-        return;
+        return "User";
       }
 
       const parsedUser = JSON.parse(rawUser);
-      setUserName(parsedUser?.name || "User");
+      return parsedUser?.name || "User";
     } catch {
-      setUserName("User");
+      return "User";
     }
-  }, []);
+  });
 
   return (
     <div className="bg-gray-200 h-full p-2">

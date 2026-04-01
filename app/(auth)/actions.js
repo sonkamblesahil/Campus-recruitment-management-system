@@ -12,7 +12,7 @@ export async function signupAction(formData) {
   const role = String(formData.get("role") || "")
     .trim()
     .toLowerCase();
-  const allowedRoles = ["admin", "recruiter", "student"];
+  const allowedRoles = ["admin", "student"];
 
   if (!name || !email || !password || !role) {
     return { success: false, error: "All fields are required" };

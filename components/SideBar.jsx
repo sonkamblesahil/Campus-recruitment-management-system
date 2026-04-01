@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
- 
   HomeIcon,
   BriefcaseIcon,
   DocumentTextIcon,
@@ -12,21 +12,53 @@ import {
   UserIcon,
 } from "@heroicons/react/24/outline";
 
-const navItems = [
+const studentNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
   { href: "/jobs", label: "Job Postings", icon: BriefcaseIcon },
   { href: "/applications", label: "Applications", icon: DocumentTextIcon },
   { href: "/offers", label: "Offers", icon: GiftIcon },
   { href: "/analytics", label: "Placement Analytics", icon: ChartBarIcon },
-  { href: "/profile", label: "Profile", icon: UserIcon }, // 👈 Added Profile
+  { href: "/profile", label: "Profile", icon: UserIcon },
+];
+
+const adminNavItems = [
+  { href: "/admin/jobs", label: "Create Jobs", icon: BriefcaseIcon },
 ];
 
 export default function SideBar() {
   const pathname = usePathname();
+  const [role, setRole] = useState("student");
+
+  useEffect(() => {
+    const readRole = () => {
+      try {
+        const rawUser = localStorage.getItem("auth_user");
+        if (!rawUser) {
+          setRole("student");
+          return;
+        }
+
+        const parsedUser = JSON.parse(rawUser);
+        setRole(parsedUser?.role === "admin" ? "admin" : "student");
+      } catch {
+        setRole("student");
+      }
+    };
+
+    readRole();
+    window.addEventListener("storage", readRole);
+    window.addEventListener("auth-user-changed", readRole);
+
+    return () => {
+      window.removeEventListener("storage", readRole);
+      window.removeEventListener("auth-user-changed", readRole);
+    };
+  }, []);
+
+  const navItems = role === "admin" ? adminNavItems : studentNavItems;
 
   return (
     <nav className="h-full bg-gray-900/95 md:group-hover/sidebar:bg-gray-900/60 backdrop-blur-md text-white shadow-2xl flex flex-col transition-colors duration-300">
-  
       {/* Navigation */}
       <ul className="flex-1 p-3 space-y-4 mt-10">
         {navItems.map((item) => {

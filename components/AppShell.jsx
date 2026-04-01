@@ -22,14 +22,42 @@ export default function AppShell({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [role, setRole] = useState("student");
 
   const isAuthPage =
     pathname === "/" || pathname === "/login" || pathname === "/signup";
+  const isAdminPath = pathname.startsWith("/admin");
   const isAuthenticated = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
     getServerSnapshot,
   );
+
+  useEffect(() => {
+    const readRole = () => {
+      try {
+        const rawUser = localStorage.getItem("auth_user");
+        if (!rawUser) {
+          setRole("student");
+          return;
+        }
+
+        const parsedUser = JSON.parse(rawUser);
+        setRole(parsedUser?.role === "admin" ? "admin" : "student");
+      } catch {
+        setRole("student");
+      }
+    };
+
+    readRole();
+    window.addEventListener("storage", readRole);
+    window.addEventListener("auth-user-changed", readRole);
+
+    return () => {
+      window.removeEventListener("storage", readRole);
+      window.removeEventListener("auth-user-changed", readRole);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthPage && !isAuthenticated) {
@@ -38,9 +66,19 @@ export default function AppShell({ children }) {
     }
 
     if (isAuthPage && isAuthenticated) {
+      router.replace(role === "admin" ? "/admin/jobs" : "/dashboard");
+      return;
+    }
+
+    if (!isAuthPage && isAuthenticated && role === "admin" && !isAdminPath) {
+      router.replace("/admin/jobs");
+      return;
+    }
+
+    if (!isAuthPage && isAuthenticated && role !== "admin" && isAdminPath) {
       router.replace("/dashboard");
     }
-  }, [isAuthPage, isAuthenticated, router]);
+  }, [isAdminPath, isAuthPage, isAuthenticated, role, router]);
 
   // Auth pages: no navbar / sidebar
   if (isAuthPage) {
@@ -54,16 +92,22 @@ export default function AppShell({ children }) {
     return null;
   }
 
+  const showNavbar = true;
+  const isSidebarOpen = sidebarOpen;
+  const sidebarTopOffsetClass = "top-14 h-[calc(100vh-56px)]";
+
   return (
     <div className="bg-gray-900 min-h-screen flex flex-col">
       {/* Top Navbar */}
-      <header className="h-14 shrink-0">
-        <Navbar onMenuClick={() => setSidebarOpen(true)} />
-      </header>
+      {showNavbar ? (
+        <header className="h-14 shrink-0">
+          <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        </header>
+      ) : null}
 
       {/* App Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {sidebarOpen && (
+        {showNavbar && sidebarOpen && (
           <button
             type="button"
             aria-label="Close menu overlay"
@@ -74,8 +118,10 @@ export default function AppShell({ children }) {
 
         {/* Sidebar */}
         <aside
-          className={`group/sidebar fixed md:static top-14 left-0 h-[calc(100vh-56px)] md:h-auto w-58 md:w-20 md:hover:w-58 overflow-hidden border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          className={`group/sidebar fixed md:static left-0 ${sidebarTopOffsetClass} md:h-auto w-58 md:w-20 md:hover:w-58 overflow-hidden border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full md:translate-x-0"
           }`}
         >
           <SideBar />

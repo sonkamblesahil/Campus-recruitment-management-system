@@ -34,6 +34,11 @@ export default function LoginPage() {
     );
     window.dispatchEvent(new Event("auth-user-changed"));
 
+    if (result.role === "admin") {
+      router.push("/admin/jobs");
+      return;
+    }
+
     router.push("/dashboard");
   };
 

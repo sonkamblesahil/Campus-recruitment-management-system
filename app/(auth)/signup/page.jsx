@@ -34,6 +34,11 @@ export default function SignupPage() {
     );
     window.dispatchEvent(new Event("auth-user-changed"));
 
+    if (result.role === "admin") {
+      router.push("/admin/jobs");
+      return;
+    }
+
     router.push("/dashboard");
   };
 
@@ -127,7 +132,6 @@ export default function SignupPage() {
                 required
               >
                 <option value="student">Student</option>
-                <option value="recruiter">Recruiter</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
