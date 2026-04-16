@@ -25,6 +25,10 @@ const adminNavItems = [
   { href: "/admin/jobs", label: "Create Jobs", icon: BriefcaseIcon },
 ];
 
+const recruiterNavItems = [
+  { href: "/recruiter/jobs", label: "Create Jobs", icon: BriefcaseIcon },
+];
+
 export default function SideBar() {
   const pathname = usePathname();
   const [role, setRole] = useState("student");
@@ -39,7 +43,11 @@ export default function SideBar() {
         }
 
         const parsedUser = JSON.parse(rawUser);
-        setRole(parsedUser?.role === "admin" ? "admin" : "student");
+        setRole(
+          parsedUser?.role === "admin" || parsedUser?.role === "recruiter"
+            ? parsedUser.role
+            : "student",
+        );
       } catch {
         setRole("student");
       }
@@ -55,7 +63,12 @@ export default function SideBar() {
     };
   }, []);
 
-  const navItems = role === "admin" ? adminNavItems : studentNavItems;
+  const navItems =
+    role === "admin"
+      ? adminNavItems
+      : role === "recruiter"
+        ? recruiterNavItems
+        : studentNavItems;
 
   return (
     <nav className="h-full bg-gray-900/95 md:group-hover/sidebar:bg-gray-900/60 backdrop-blur-md text-white shadow-2xl flex flex-col transition-colors duration-300">

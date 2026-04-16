@@ -39,6 +39,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (result.role === "recruiter") {
+      router.push("/recruiter/jobs");
+      return;
+    }
+
     router.push("/dashboard");
   };
 

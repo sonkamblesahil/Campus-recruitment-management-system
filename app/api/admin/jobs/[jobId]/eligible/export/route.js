@@ -32,7 +32,10 @@ export async function GET(request, context) {
   await connectToDatabase();
 
   const admin = await User.findById(adminId).lean();
-  if (!admin || normalizeRole(admin.role) !== "admin") {
+  if (
+    !admin ||
+    !["admin", "recruiter"].includes(normalizeRole(admin.role))
+  ) {
     return new Response("Unauthorized", { status: 403 });
   }
 

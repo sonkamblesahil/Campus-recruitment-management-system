@@ -159,7 +159,3 @@ export default function JobListingPage() {
     </div>
   );
 }
-
-export const config = {
-  amp: false,
-};

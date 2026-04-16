@@ -39,6 +39,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (result.role === "recruiter") {
+      router.push("/recruiter/jobs");
+      return;
+    }
+
     router.push("/dashboard");
   };
 
@@ -133,6 +138,7 @@ export default function SignupPage() {
               >
                 <option value="student">Student</option>
                 <option value="admin">Admin</option>
+                <option value="recruiter">Recruiter</option>
               </select>
             </div>
 

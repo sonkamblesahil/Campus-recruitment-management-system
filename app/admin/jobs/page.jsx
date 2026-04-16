@@ -95,7 +95,10 @@ export default function AdminJobsPage() {
   }
 
   useEffect(() => {
-    if (!authUser?.userId || authUser.role !== "admin") {
+    if (
+      !authUser?.userId ||
+      !["admin", "recruiter"].includes(authUser.role || "")
+    ) {
       return;
     }
 
@@ -110,7 +113,7 @@ export default function AdminJobsPage() {
     return <div className="p-4 text-sm text-zinc-600">Loading...</div>;
   }
 
-  if (authUser.role !== "admin") {
+  if (!["admin", "recruiter"].includes(authUser.role || "")) {
     return (
       <div className="p-4 text-sm text-red-600">
         You are not allowed to access this page.
@@ -189,7 +192,11 @@ export default function AdminJobsPage() {
 
   return (
     <div className="h-full p-3 rounded-2xl">
-      <h1 className="text-zinc-700 text-lg font-bold">Admin Job Management</h1>
+      <h1 className="text-zinc-700 text-lg font-bold">
+        {authUser.role === "recruiter"
+          ? "Recruiter Job Management"
+          : "Admin Job Management"}
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-[82vh] mt-3">
         <section className="bg-white rounded-2xl p-3 overflow-y-auto">

@@ -27,6 +27,8 @@ export default function AppShell({ children }) {
   const isAuthPage =
     pathname === "/" || pathname === "/login" || pathname === "/signup";
   const isAdminPath = pathname.startsWith("/admin");
+  const isRecruiterPath = pathname.startsWith("/recruiter");
+  const isPrivilegedPath = isAdminPath || isRecruiterPath;
   const isAuthenticated = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -43,7 +45,11 @@ export default function AppShell({ children }) {
         }
 
         const parsedUser = JSON.parse(rawUser);
-        setRole(parsedUser?.role === "admin" ? "admin" : "student");
+        setRole(
+          parsedUser?.role === "admin" || parsedUser?.role === "recruiter"
+            ? parsedUser.role
+            : "student",
+        );
       } catch {
         setRole("student");
       }
@@ -66,7 +72,17 @@ export default function AppShell({ children }) {
     }
 
     if (isAuthPage && isAuthenticated) {
-      router.replace(role === "admin" ? "/admin/jobs" : "/dashboard");
+      if (role === "admin") {
+        router.replace("/admin/jobs");
+        return;
+      }
+
+      if (role === "recruiter") {
+        router.replace("/recruiter/jobs");
+        return;
+      }
+
+      router.replace("/dashboard");
       return;
     }
 
@@ -75,10 +91,53 @@ export default function AppShell({ children }) {
       return;
     }
 
-    if (!isAuthPage && isAuthenticated && role !== "admin" && isAdminPath) {
-      router.replace("/dashboard");
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      role === "recruiter" &&
+      !isRecruiterPath
+    ) {
+      router.replace("/recruiter/jobs");
+      return;
     }
-  }, [isAdminPath, isAuthPage, isAuthenticated, role, router]);
+
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      role === "student" &&
+      isPrivilegedPath
+    ) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      role === "admin" &&
+      isRecruiterPath
+    ) {
+      router.replace("/admin/jobs");
+      return;
+    }
+
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      role === "recruiter" &&
+      isAdminPath
+    ) {
+      router.replace("/recruiter/jobs");
+    }
+  }, [
+    isAdminPath,
+    isAuthPage,
+    isAuthenticated,
+    isPrivilegedPath,
+    isRecruiterPath,
+    role,
+    router,
+  ]);
 
   // Auth pages: no navbar / sidebar
   if (isAuthPage) {
