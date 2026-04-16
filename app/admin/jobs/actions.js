@@ -35,10 +35,10 @@ function normalizeDepartments(value) {
     .filter(Boolean);
 }
 
-async function requireJobManager(userId) {
+async function requireAdminOrRecruiter(userId) {
   const normalizedUserId = normalizeText(userId);
   if (!mongoose.Types.ObjectId.isValid(normalizedUserId)) {
-    return { success: false, error: "Invalid user" };
+    return { success: false, error: "Invalid user ID" };
   }
 
   const user = await User.findById(normalizedUserId).lean();
@@ -86,10 +86,10 @@ function mapJob(job) {
   };
 }
 
-export async function createJobAction(adminId, payload) {
+export async function createJobAction(userId, payload) {
   await connectToDatabase();
 
-  const adminResult = await requireJobManager(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -108,10 +108,10 @@ export async function createJobAction(adminId, payload) {
   return { success: true, data: mapJob(created.toObject()) };
 }
 
-export async function updateJobAction(adminId, jobId, payload) {
+export async function updateJobAction(userId, jobId, payload) {
   await connectToDatabase();
 
-  const adminResult = await requireJobManager(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -146,10 +146,10 @@ export async function updateJobAction(adminId, jobId, payload) {
   return { success: true, data: mapJob(existingJob.toObject()) };
 }
 
-export async function getAdminJobsAction(adminId) {
+export async function getAdminJobsAction(userId) {
   await connectToDatabase();
 
-  const adminResult = await requireJobManager(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -161,10 +161,10 @@ export async function getAdminJobsAction(adminId) {
   return { success: true, data: jobs.map(mapJob) };
 }
 
-export async function getEligibleStudentsForJobAction(adminId, jobId) {
+export async function getEligibleStudentsForJobAction(userId, jobId) {
   await connectToDatabase();
 
-  const adminResult = await requireJobManager(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
