@@ -35,18 +35,18 @@ function normalizeDepartments(value) {
     .filter(Boolean);
 }
 
-async function requireAdmin(userId) {
+async function requireAdminOrRecruiter(userId) {
   const normalizedUserId = normalizeText(userId);
   if (!mongoose.Types.ObjectId.isValid(normalizedUserId)) {
-    return { success: false, error: "Invalid admin user" };
+    return { success: false, error: "Invalid user ID" };
   }
 
-  const admin = await User.findById(normalizedUserId).lean();
-  if (!admin || normalizeRole(admin.role) !== "admin") {
+  const user = await User.findById(normalizedUserId).lean();
+  if (!user || !["admin", "recruiter"].includes(normalizeRole(user.role))) {
     return { success: false, error: "Unauthorized" };
   }
 
-  return { success: true, adminId: normalizedUserId, admin };
+  return { success: true, userId: normalizedUserId, user };
 }
 
 function buildJobPayload(payload) {
@@ -86,10 +86,10 @@ function mapJob(job) {
   };
 }
 
-export async function createJobAction(adminId, payload) {
+export async function createJobAction(userId, payload) {
   await connectToDatabase();
 
-  const adminResult = await requireAdmin(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -102,16 +102,16 @@ export async function createJobAction(adminId, payload) {
 
   const created = await Job.create({
     ...jobPayload,
-    createdBy: adminResult.adminId,
+    createdBy: adminResult.userId,
   });
 
   return { success: true, data: mapJob(created.toObject()) };
 }
 
-export async function updateJobAction(adminId, jobId, payload) {
+export async function updateJobAction(userId, jobId, payload) {
   await connectToDatabase();
 
-  const adminResult = await requireAdmin(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -126,7 +126,7 @@ export async function updateJobAction(adminId, jobId, payload) {
     return { success: false, error: "Job not found" };
   }
 
-  if (String(existingJob.createdBy) !== adminResult.adminId) {
+  if (String(existingJob.createdBy) !== adminResult.userId) {
     return { success: false, error: "You can only update your own jobs" };
   }
 
@@ -146,25 +146,25 @@ export async function updateJobAction(adminId, jobId, payload) {
   return { success: true, data: mapJob(existingJob.toObject()) };
 }
 
-export async function getAdminJobsAction(adminId) {
+export async function getAdminJobsAction(userId) {
   await connectToDatabase();
 
-  const adminResult = await requireAdmin(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
 
-  const jobs = await Job.find({ createdBy: adminResult.adminId })
+  const jobs = await Job.find({ createdBy: adminResult.userId })
     .sort({ createdAt: -1 })
     .lean();
 
   return { success: true, data: jobs.map(mapJob) };
 }
 
-export async function getEligibleStudentsForJobAction(adminId, jobId) {
+export async function getEligibleStudentsForJobAction(userId, jobId) {
   await connectToDatabase();
 
-  const adminResult = await requireAdmin(adminId);
+  const adminResult = await requireAdminOrRecruiter(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -179,7 +179,7 @@ export async function getEligibleStudentsForJobAction(adminId, jobId) {
     return { success: false, error: "Job not found" };
   }
 
-  if (String(job.createdBy) !== adminResult.adminId) {
+  if (String(job.createdBy) !== adminResult.userId) {
     return { success: false, error: "Unauthorized" };
   }
 
