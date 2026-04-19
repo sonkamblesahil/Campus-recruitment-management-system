@@ -167,7 +167,7 @@ export default function AppShell({ children }) {
     if (isAuthenticated) {
       return null;
     }
-    return <main className="flex-1">{children}</main>;
+    return <main className="flex-1 overflow-y-auto">{children}</main>;
   }
 
   if (!isAuthenticated) {

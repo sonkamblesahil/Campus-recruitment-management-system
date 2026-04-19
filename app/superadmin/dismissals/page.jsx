@@ -6,6 +6,7 @@ import {
   getDismissedUsersAction,
   restoreDismissedUserAction,
   setDismissedUserBanAction,
+  unbanStudentByEmailAction,
 } from "../actions";
 
 export default function SuperAdminDismissalsPage() {
@@ -24,8 +25,9 @@ export default function SuperAdminDismissalsPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [manualDismissUserId, setManualDismissUserId] = useState("");
+  const [manualDismissEmail, setManualDismissEmail] = useState("");
   const [manualDismissReason, setManualDismissReason] = useState("");
+  const [studentUnbanEmail, setStudentUnbanEmail] = useState("");
   const [updatingUserId, setUpdatingUserId] = useState("");
 
   const loadDismissedUsers = async (superAdminUserId) => {
@@ -130,18 +132,20 @@ export default function SuperAdminDismissalsPage() {
   };
 
   const handleManualDismiss = async () => {
-    if (!authUser?.userId || !manualDismissUserId.trim()) {
-      setError("Please provide a valid user id to dismiss");
+    if (!authUser?.userId || !manualDismissEmail.trim()) {
+      setError("Please provide a valid user email to dismiss");
       return;
     }
 
+    const normalizedEmail = manualDismissEmail.trim().toLowerCase();
+
     setError("");
     setMessage("");
-    setUpdatingUserId(manualDismissUserId.trim());
+    setUpdatingUserId(normalizedEmail);
 
     const result = await dismissUserAction(
       authUser.userId,
-      manualDismissUserId.trim(),
+      normalizedEmail,
       manualDismissReason,
     );
 
@@ -155,9 +159,40 @@ export default function SuperAdminDismissalsPage() {
       result.data,
       ...prev.filter((user) => user.id !== result.data.id),
     ]);
-    setManualDismissUserId("");
+    setManualDismissEmail("");
     setManualDismissReason("");
     setMessage("User dismissed successfully.");
+    setUpdatingUserId("");
+  };
+
+  const handleStudentUnbanByEmail = async () => {
+    if (!authUser?.userId || !studentUnbanEmail.trim()) {
+      setError("Please provide a valid student email to unban");
+      return;
+    }
+
+    const normalizedEmail = studentUnbanEmail.trim().toLowerCase();
+
+    setError("");
+    setMessage("");
+    setUpdatingUserId(`unban:${normalizedEmail}`);
+
+    const result = await unbanStudentByEmailAction(
+      authUser.userId,
+      normalizedEmail,
+    );
+
+    if (!result?.success) {
+      setError(result?.error || "Could not unban student");
+      setUpdatingUserId("");
+      return;
+    }
+
+    setUsers((prev) =>
+      prev.map((user) => (user.id === result.data.id ? result.data : user)),
+    );
+    setStudentUnbanEmail("");
+    setMessage("Student unbanned successfully.");
     setUpdatingUserId("");
   };
 
@@ -183,13 +218,13 @@ export default function SuperAdminDismissalsPage() {
 
       <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
         <h2 className="text-sm font-semibold text-zinc-700 mb-2">
-          Manual Dismiss User by ID
+          Manual Dismiss User by Email
         </h2>
         <div className="flex flex-wrap gap-2">
           <input
-            value={manualDismissUserId}
-            onChange={(event) => setManualDismissUserId(event.target.value)}
-            placeholder="User ObjectId"
+            value={manualDismissEmail}
+            onChange={(event) => setManualDismissEmail(event.target.value)}
+            placeholder="User Email"
             className="border border-gray-300 rounded px-3 py-2 text-sm min-w-70"
           />
           <input
@@ -201,10 +236,37 @@ export default function SuperAdminDismissalsPage() {
           <button
             type="button"
             onClick={handleManualDismiss}
-            disabled={updatingUserId === manualDismissUserId.trim()}
+            disabled={
+              updatingUserId === manualDismissEmail.trim().toLowerCase()
+            }
             className="px-3 py-2 text-sm rounded bg-red-600 text-white disabled:opacity-60"
           >
             Dismiss User
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+        <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+          Unban Student by Email
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          <input
+            value={studentUnbanEmail}
+            onChange={(event) => setStudentUnbanEmail(event.target.value)}
+            placeholder="Student Email"
+            className="border border-gray-300 rounded px-3 py-2 text-sm min-w-70"
+          />
+          <button
+            type="button"
+            onClick={handleStudentUnbanByEmail}
+            disabled={
+              updatingUserId ===
+              `unban:${studentUnbanEmail.trim().toLowerCase()}`
+            }
+            className="px-3 py-2 text-sm rounded bg-green-600 text-white disabled:opacity-60"
+          >
+            Unban Student
           </button>
         </div>
       </div>
@@ -233,7 +295,6 @@ export default function SuperAdminDismissalsPage() {
                 <td className="p-3">
                   <p className="font-medium text-zinc-700">{user.name}</p>
                   <p className="text-xs text-zinc-500">{user.email}</p>
-                  <p className="text-xs text-zinc-400">ID: {user.id}</p>
                 </td>
                 <td className="p-3 uppercase text-zinc-600">{user.role}</td>
                 <td className="p-3 text-zinc-600">

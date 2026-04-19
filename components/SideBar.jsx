@@ -27,6 +27,11 @@ const studentNavItems = [
 const adminNavItems = [
   { href: "/admin/jobs", label: "Create Jobs", icon: BriefcaseIcon },
   {
+    href: "/admin/students",
+    label: "Department Students",
+    icon: UserIcon,
+  },
+  {
     href: "/admin/applications",
     label: "Manage Applications",
     icon: DocumentTextIcon,
@@ -46,6 +51,16 @@ const superAdminNavItems = [
     href: "/superadmin/students",
     label: "Student Management",
     icon: UserIcon,
+  },
+  {
+    href: "/superadmin/jobs",
+    label: "Jobs Intelligence",
+    icon: BriefcaseIcon,
+  },
+  {
+    href: "/superadmin/activity",
+    label: "Governance Activity",
+    icon: ChartBarIcon,
   },
   {
     href: "/superadmin/dismissals",

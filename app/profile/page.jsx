@@ -1,5 +1,6 @@
 "use client";
 
+import { BRANCH_OPTIONS } from "@/lib/academics";
 import { useEffect, useMemo, useState } from "react";
 import { getProfileAction, saveProfileAction } from "./actions";
 
@@ -111,7 +112,14 @@ function Section({ title, action, children }) {
   );
 }
 
-function Field({ label, value, onChange, editable, type = "text", placeholder }) {
+function Field({
+  label,
+  value,
+  onChange,
+  editable,
+  type = "text",
+  placeholder,
+}) {
   return (
     <label className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-center text-sm">
       <span className="text-gray-600">{label}</span>
@@ -124,7 +132,44 @@ function Field({ label, value, onChange, editable, type = "text", placeholder })
           className="md:col-span-3 border border-gray-300 rounded px-3 py-2"
         />
       ) : (
-        <span className="md:col-span-3 text-gray-800 break-words">{value || "-"}</span>
+        <span className="md:col-span-3 text-gray-800 wrap-break-word">
+          {value || "-"}
+        </span>
+      )}
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  editable,
+  options,
+  placeholder,
+}) {
+  const selectedOption = options.find((option) => option.value === value);
+
+  return (
+    <label className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-center text-sm">
+      <span className="text-gray-600">{label}</span>
+      {editable ? (
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="md:col-span-3 border border-gray-300 rounded px-3 py-2 bg-white"
+        >
+          <option value="">{placeholder}</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <span className="md:col-span-3 text-gray-800 wrap-break-word">
+          {selectedOption?.label || value || "-"}
+        </span>
       )}
     </label>
   );
@@ -143,7 +188,7 @@ function TextAreaField({ label, value, onChange, editable, placeholder }) {
           className="md:col-span-3 border border-gray-300 rounded px-3 py-2"
         />
       ) : (
-        <span className="md:col-span-3 text-gray-800 whitespace-pre-wrap break-words">
+        <span className="md:col-span-3 text-gray-800 whitespace-pre-wrap wrap-break-word">
           {value || "-"}
         </span>
       )}
@@ -178,7 +223,9 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [userId, setUserId] = useState("");
   const [profile, setProfile] = useState(cloneProfile(EMPTY_PROFILE));
-  const [savedSnapshot, setSavedSnapshot] = useState(cloneProfile(EMPTY_PROFILE));
+  const [savedSnapshot, setSavedSnapshot] = useState(
+    cloneProfile(EMPTY_PROFILE),
+  );
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -488,14 +535,18 @@ export default function ProfilePage() {
                 <Field
                   label="Current Institute"
                   value={profile.academic.currentInstitute}
-                  onChange={(value) => updateAcademic("currentInstitute", value)}
+                  onChange={(value) =>
+                    updateAcademic("currentInstitute", value)
+                  }
                   editable={isEditing}
                 />
-                <Field
+                <SelectField
                   label="Department"
                   value={profile.academic.department}
                   onChange={(value) => updateAcademic("department", value)}
                   editable={isEditing}
+                  options={BRANCH_OPTIONS}
+                  placeholder="Select Department"
                 />
                 <Field
                   label="Current Semester"
@@ -517,7 +568,9 @@ export default function ProfilePage() {
                   isEditing && (
                     <button
                       type="button"
-                      onClick={() => addArrayItem("semesterMarks", newSemesterRow)}
+                      onClick={() =>
+                        addArrayItem("semesterMarks", newSemesterRow)
+                      }
                       className="text-sm text-green-600"
                     >
                       + Add Semester
@@ -534,7 +587,9 @@ export default function ProfilePage() {
                         <th className="text-left px-3 py-2">Total Marks</th>
                         <th className="text-left px-3 py-2">Percentage</th>
                         <th className="text-left px-3 py-2">CGPA</th>
-                        {isEditing && <th className="text-left px-3 py-2">Action</th>}
+                        {isEditing && (
+                          <th className="text-left px-3 py-2">Action</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -549,35 +604,44 @@ export default function ProfilePage() {
                         </tr>
                       )}
                       {profile.semesterMarks.map((row, index) => (
-                        <tr key={`sem-${index}`} className="border-t border-gray-100">
-                          {["semester", "marksObtained", "totalMarks", "percentage", "cgpa"].map(
-                            (field) => (
-                              <td key={field} className="px-3 py-2 align-top">
-                                {isEditing ? (
-                                  <input
-                                    value={row[field] || ""}
-                                    onChange={(event) =>
-                                      updateArrayItem(
-                                        "semesterMarks",
-                                        index,
-                                        field,
-                                        event.target.value,
-                                      )
-                                    }
-                                    className="w-full border border-gray-300 rounded px-2 py-1"
-                                  />
-                                ) : (
-                                  <span>{row[field] || "-"}</span>
-                                )}
-                              </td>
-                            ),
-                          )}
+                        <tr
+                          key={`sem-${index}`}
+                          className="border-t border-gray-100"
+                        >
+                          {[
+                            "semester",
+                            "marksObtained",
+                            "totalMarks",
+                            "percentage",
+                            "cgpa",
+                          ].map((field) => (
+                            <td key={field} className="px-3 py-2 align-top">
+                              {isEditing ? (
+                                <input
+                                  value={row[field] || ""}
+                                  onChange={(event) =>
+                                    updateArrayItem(
+                                      "semesterMarks",
+                                      index,
+                                      field,
+                                      event.target.value,
+                                    )
+                                  }
+                                  className="w-full border border-gray-300 rounded px-2 py-1"
+                                />
+                              ) : (
+                                <span>{row[field] || "-"}</span>
+                              )}
+                            </td>
+                          ))}
                           {isEditing && (
                             <td className="px-3 py-2">
                               <button
                                 type="button"
                                 className="text-xs text-red-500"
-                                onClick={() => removeArrayItem("semesterMarks", index)}
+                                onClick={() =>
+                                  removeArrayItem("semesterMarks", index)
+                                }
                               >
                                 Remove
                               </button>
@@ -609,7 +673,9 @@ export default function ProfilePage() {
             >
               <div className="space-y-4">
                 {profile.education.length === 0 && (
-                  <p className="text-sm text-gray-500">No education records added.</p>
+                  <p className="text-sm text-gray-500">
+                    No education records added.
+                  </p>
                 )}
                 {profile.education.map((item, index) => (
                   <Block
@@ -641,21 +707,30 @@ export default function ProfilePage() {
                           ))}
                         </select>
                       ) : (
-                        <span className="md:col-span-3">{item.qualification || "-"}</span>
+                        <span className="md:col-span-3">
+                          {item.qualification || "-"}
+                        </span>
                       )}
                     </label>
 
                     <Field
                       label="Institute Name"
                       value={item.institute || ""}
-                      onChange={(value) => updateArrayItem("education", index, "institute", value)}
+                      onChange={(value) =>
+                        updateArrayItem("education", index, "institute", value)
+                      }
                       editable={isEditing}
                     />
                     <Field
                       label="Board/University"
                       value={item.boardOrUniversity || ""}
                       onChange={(value) =>
-                        updateArrayItem("education", index, "boardOrUniversity", value)
+                        updateArrayItem(
+                          "education",
+                          index,
+                          "boardOrUniversity",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -663,21 +738,30 @@ export default function ProfilePage() {
                       label="Year Of Passing"
                       value={item.yearOfPassing || ""}
                       onChange={(value) =>
-                        updateArrayItem("education", index, "yearOfPassing", value)
+                        updateArrayItem(
+                          "education",
+                          index,
+                          "yearOfPassing",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
                     <Field
                       label="Score Type"
                       value={item.scoreType || ""}
-                      onChange={(value) => updateArrayItem("education", index, "scoreType", value)}
+                      onChange={(value) =>
+                        updateArrayItem("education", index, "scoreType", value)
+                      }
                       editable={isEditing}
                       placeholder="Marks / Percentage / CGPA"
                     />
                     <Field
                       label="Score"
                       value={item.score || ""}
-                      onChange={(value) => updateArrayItem("education", index, "score", value)}
+                      onChange={(value) =>
+                        updateArrayItem("education", index, "score", value)
+                      }
                       editable={isEditing}
                     />
                   </Block>
@@ -693,7 +777,9 @@ export default function ProfilePage() {
                 isEditing && (
                   <button
                     type="button"
-                    onClick={() => addArrayItem("experiences", newExperienceRow)}
+                    onClick={() =>
+                      addArrayItem("experiences", newExperienceRow)
+                    }
                     className="text-sm text-green-600"
                   >
                     + Add Experience
@@ -703,7 +789,9 @@ export default function ProfilePage() {
             >
               <div className="space-y-4">
                 {profile.experiences.length === 0 && (
-                  <p className="text-sm text-gray-500">No experience records added.</p>
+                  <p className="text-sm text-gray-500">
+                    No experience records added.
+                  </p>
                 )}
                 {profile.experiences.map((item, index) => (
                   <Block
@@ -718,7 +806,12 @@ export default function ProfilePage() {
                         <select
                           value={item.type || "internship"}
                           onChange={(event) =>
-                            updateArrayItem("experiences", index, "type", event.target.value)
+                            updateArrayItem(
+                              "experiences",
+                              index,
+                              "type",
+                              event.target.value,
+                            )
                           }
                           className="md:col-span-3 border border-gray-300 rounded px-3 py-2"
                         >
@@ -727,7 +820,9 @@ export default function ProfilePage() {
                         </select>
                       ) : (
                         <span className="md:col-span-3">
-                          {item.type === "work" ? "Work Experience" : "Internship"}
+                          {item.type === "work"
+                            ? "Work Experience"
+                            : "Internship"}
                         </span>
                       )}
                     </label>
@@ -736,41 +831,62 @@ export default function ProfilePage() {
                       label="Organization"
                       value={item.organization || ""}
                       onChange={(value) =>
-                        updateArrayItem("experiences", index, "organization", value)
+                        updateArrayItem(
+                          "experiences",
+                          index,
+                          "organization",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
                     <Field
                       label="Role"
                       value={item.role || ""}
-                      onChange={(value) => updateArrayItem("experiences", index, "role", value)}
+                      onChange={(value) =>
+                        updateArrayItem("experiences", index, "role", value)
+                      }
                       editable={isEditing}
                     />
                     <Field
                       label="Start Date"
                       value={item.startDate || ""}
                       onChange={(value) =>
-                        updateArrayItem("experiences", index, "startDate", value)
+                        updateArrayItem(
+                          "experiences",
+                          index,
+                          "startDate",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
                     <Field
                       label="End Date"
                       value={item.endDate || ""}
-                      onChange={(value) => updateArrayItem("experiences", index, "endDate", value)}
+                      onChange={(value) =>
+                        updateArrayItem("experiences", index, "endDate", value)
+                      }
                       editable={isEditing}
                     />
                     <Field
                       label="Duration"
                       value={item.duration || ""}
-                      onChange={(value) => updateArrayItem("experiences", index, "duration", value)}
+                      onChange={(value) =>
+                        updateArrayItem("experiences", index, "duration", value)
+                      }
                       editable={isEditing}
                     />
                     <TextAreaField
                       label="Description"
                       value={item.description || ""}
                       onChange={(value) =>
-                        updateArrayItem("experiences", index, "description", value)
+                        updateArrayItem(
+                          "experiences",
+                          index,
+                          "description",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -797,7 +913,9 @@ export default function ProfilePage() {
             >
               <div className="space-y-4">
                 {profile.projects.length === 0 && (
-                  <p className="text-sm text-gray-500">No project records added.</p>
+                  <p className="text-sm text-gray-500">
+                    No project records added.
+                  </p>
                 )}
                 {profile.projects.map((item, index) => (
                   <Block
@@ -809,7 +927,9 @@ export default function ProfilePage() {
                     <Field
                       label="Project Title"
                       value={item.title || ""}
-                      onChange={(value) => updateArrayItem("projects", index, "title", value)}
+                      onChange={(value) =>
+                        updateArrayItem("projects", index, "title", value)
+                      }
                       editable={isEditing}
                     />
                     <TextAreaField
@@ -823,7 +943,9 @@ export default function ProfilePage() {
                     <Field
                       label="Duration"
                       value={item.duration || ""}
-                      onChange={(value) => updateArrayItem("projects", index, "duration", value)}
+                      onChange={(value) =>
+                        updateArrayItem("projects", index, "duration", value)
+                      }
                       editable={isEditing}
                     />
                     <Field
@@ -837,13 +959,17 @@ export default function ProfilePage() {
                     <Field
                       label="Live Link"
                       value={item.liveLink || ""}
-                      onChange={(value) => updateArrayItem("projects", index, "liveLink", value)}
+                      onChange={(value) =>
+                        updateArrayItem("projects", index, "liveLink", value)
+                      }
                       editable={isEditing}
                     />
                     <Field
                       label="Tech Stack"
                       value={item.techStack || ""}
-                      onChange={(value) => updateArrayItem("projects", index, "techStack", value)}
+                      onChange={(value) =>
+                        updateArrayItem("projects", index, "techStack", value)
+                      }
                       editable={isEditing}
                       placeholder="React, Node.js, MongoDB"
                     />
@@ -858,7 +984,11 @@ export default function ProfilePage() {
               title="Skills"
               action={
                 isEditing && (
-                  <button type="button" onClick={addSkill} className="text-sm text-green-600">
+                  <button
+                    type="button"
+                    onClick={addSkill}
+                    className="text-sm text-green-600"
+                  >
                     + Add Skill
                   </button>
                 )
@@ -869,11 +999,16 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-500">No skills added.</p>
                 )}
                 {profile.skills.map((skill, index) => (
-                  <div key={`skill-${index}`} className="flex items-center gap-2">
+                  <div
+                    key={`skill-${index}`}
+                    className="flex items-center gap-2"
+                  >
                     {isEditing ? (
                       <input
                         value={skill || ""}
-                        onChange={(event) => updateSkill(index, event.target.value)}
+                        onChange={(event) =>
+                          updateSkill(index, event.target.value)
+                        }
                         className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm"
                         placeholder="Add a skill"
                       />
@@ -904,7 +1039,9 @@ export default function ProfilePage() {
                 isEditing && (
                   <button
                     type="button"
-                    onClick={() => addArrayItem("certifications", newCertificationRow)}
+                    onClick={() =>
+                      addArrayItem("certifications", newCertificationRow)
+                    }
                     className="text-sm text-green-600"
                   >
                     + Add Certificate
@@ -914,7 +1051,9 @@ export default function ProfilePage() {
             >
               <div className="space-y-4">
                 {profile.certifications.length === 0 && (
-                  <p className="text-sm text-gray-500">No certificates added.</p>
+                  <p className="text-sm text-gray-500">
+                    No certificates added.
+                  </p>
                 )}
                 {profile.certifications.map((item, index) => (
                   <Block
@@ -935,7 +1074,12 @@ export default function ProfilePage() {
                       label="Organization"
                       value={item.organization || ""}
                       onChange={(value) =>
-                        updateArrayItem("certifications", index, "organization", value)
+                        updateArrayItem(
+                          "certifications",
+                          index,
+                          "organization",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -943,7 +1087,12 @@ export default function ProfilePage() {
                       label="Issue Date"
                       value={item.issueDate || ""}
                       onChange={(value) =>
-                        updateArrayItem("certifications", index, "issueDate", value)
+                        updateArrayItem(
+                          "certifications",
+                          index,
+                          "issueDate",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -951,7 +1100,12 @@ export default function ProfilePage() {
                       label="Credential ID"
                       value={item.credentialId || ""}
                       onChange={(value) =>
-                        updateArrayItem("certifications", index, "credentialId", value)
+                        updateArrayItem(
+                          "certifications",
+                          index,
+                          "credentialId",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -959,7 +1113,12 @@ export default function ProfilePage() {
                       label="Credential URL"
                       value={item.credentialUrl || ""}
                       onChange={(value) =>
-                        updateArrayItem("certifications", index, "credentialUrl", value)
+                        updateArrayItem(
+                          "certifications",
+                          index,
+                          "credentialUrl",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -967,7 +1126,12 @@ export default function ProfilePage() {
                       label="Description"
                       value={item.description || ""}
                       onChange={(value) =>
-                        updateArrayItem("certifications", index, "description", value)
+                        updateArrayItem(
+                          "certifications",
+                          index,
+                          "description",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -984,7 +1148,9 @@ export default function ProfilePage() {
                 isEditing && (
                   <button
                     type="button"
-                    onClick={() => addArrayItem("achievements", newAchievementRow)}
+                    onClick={() =>
+                      addArrayItem("achievements", newAchievementRow)
+                    }
                     className="text-sm text-green-600"
                   >
                     + Add Achievement
@@ -994,7 +1160,9 @@ export default function ProfilePage() {
             >
               <div className="space-y-4">
                 {profile.achievements.length === 0 && (
-                  <p className="text-sm text-gray-500">No achievements added.</p>
+                  <p className="text-sm text-gray-500">
+                    No achievements added.
+                  </p>
                 )}
                 {profile.achievements.map((item, index) => (
                   <Block
@@ -1014,14 +1182,21 @@ export default function ProfilePage() {
                     <Field
                       label="Date"
                       value={item.date || ""}
-                      onChange={(value) => updateArrayItem("achievements", index, "date", value)}
+                      onChange={(value) =>
+                        updateArrayItem("achievements", index, "date", value)
+                      }
                       editable={isEditing}
                     />
                     <TextAreaField
                       label="Description"
                       value={item.description || ""}
                       onChange={(value) =>
-                        updateArrayItem("achievements", index, "description", value)
+                        updateArrayItem(
+                          "achievements",
+                          index,
+                          "description",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -1038,7 +1213,9 @@ export default function ProfilePage() {
                 isEditing && (
                   <button
                     type="button"
-                    onClick={() => addArrayItem("extracurriculars", newExtracurricularRow)}
+                    onClick={() =>
+                      addArrayItem("extracurriculars", newExtracurricularRow)
+                    }
                     className="text-sm text-green-600"
                   >
                     + Add Activity
@@ -1048,7 +1225,9 @@ export default function ProfilePage() {
             >
               <div className="space-y-4">
                 {profile.extracurriculars.length === 0 && (
-                  <p className="text-sm text-gray-500">No extracurricular activities added.</p>
+                  <p className="text-sm text-gray-500">
+                    No extracurricular activities added.
+                  </p>
                 )}
                 {profile.extracurriculars.map((item, index) => (
                   <Block
@@ -1061,7 +1240,12 @@ export default function ProfilePage() {
                       label="Title"
                       value={item.title || ""}
                       onChange={(value) =>
-                        updateArrayItem("extracurriculars", index, "title", value)
+                        updateArrayItem(
+                          "extracurriculars",
+                          index,
+                          "title",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -1069,7 +1253,12 @@ export default function ProfilePage() {
                       label="Club/Organization"
                       value={item.clubName || ""}
                       onChange={(value) =>
-                        updateArrayItem("extracurriculars", index, "clubName", value)
+                        updateArrayItem(
+                          "extracurriculars",
+                          index,
+                          "clubName",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -1077,7 +1266,12 @@ export default function ProfilePage() {
                       label="Role"
                       value={item.role || ""}
                       onChange={(value) =>
-                        updateArrayItem("extracurriculars", index, "role", value)
+                        updateArrayItem(
+                          "extracurriculars",
+                          index,
+                          "role",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -1085,7 +1279,12 @@ export default function ProfilePage() {
                       label="Duration"
                       value={item.duration || ""}
                       onChange={(value) =>
-                        updateArrayItem("extracurriculars", index, "duration", value)
+                        updateArrayItem(
+                          "extracurriculars",
+                          index,
+                          "duration",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />
@@ -1093,7 +1292,12 @@ export default function ProfilePage() {
                       label="Description"
                       value={item.description || ""}
                       onChange={(value) =>
-                        updateArrayItem("extracurriculars", index, "description", value)
+                        updateArrayItem(
+                          "extracurriculars",
+                          index,
+                          "description",
+                          value,
+                        )
                       }
                       editable={isEditing}
                     />

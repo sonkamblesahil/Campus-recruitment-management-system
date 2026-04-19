@@ -25,6 +25,7 @@ export default function SuperAdminAdminsPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [branchFilter, setBranchFilter] = useState("all");
   const [updatingAdminId, setUpdatingAdminId] = useState("");
 
   useEffect(() => {
@@ -53,6 +54,14 @@ export default function SuperAdminAdminsPage() {
     if (!normalizedSearch) return admins;
 
     return admins.filter((admin) => {
+      const branchMatch =
+        branchFilter === "all" ||
+        String(admin.branch || "").toUpperCase() === branchFilter;
+
+      if (!branchMatch) {
+        return false;
+      }
+
       return (
         String(admin.name || "")
           .toLowerCase()
@@ -65,7 +74,7 @@ export default function SuperAdminAdminsPage() {
           .includes(normalizedSearch)
       );
     });
-  }, [admins, searchTerm]);
+  }, [admins, branchFilter, searchTerm]);
 
   const handleAssign = async (adminId, branch) => {
     if (!authUser?.userId || !adminId || !branch) return;
@@ -114,7 +123,7 @@ export default function SuperAdminAdminsPage() {
   };
 
   const handleDismiss = async (admin) => {
-    if (!authUser?.userId || !admin?.id) return;
+    if (!authUser?.userId || !admin?.email) return;
 
     const reason =
       window.prompt(
@@ -126,7 +135,11 @@ export default function SuperAdminAdminsPage() {
     setMessage("");
     setUpdatingAdminId(admin.id);
 
-    const result = await dismissUserAction(authUser.userId, admin.id, reason);
+    const result = await dismissUserAction(
+      authUser.userId,
+      admin.email,
+      reason,
+    );
     if (!result?.success) {
       setError(result?.error || "Could not dismiss admin");
       setUpdatingAdminId("");
@@ -158,12 +171,26 @@ export default function SuperAdminAdminsPage() {
         <p className="text-sm text-green-600 mb-2">{message}</p>
       ) : null}
 
-      <input
-        value={searchTerm}
-        onChange={(event) => setSearchTerm(event.target.value)}
-        placeholder="Search admin by name/email/branch"
-        className="border border-gray-300 rounded px-3 py-2 text-sm mb-3 min-w-70"
-      />
+      <div className="flex flex-wrap gap-2 mb-3">
+        <input
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search admin by name/email/branch"
+          className="border border-gray-300 rounded px-3 py-2 text-sm min-w-70"
+        />
+        <select
+          value={branchFilter}
+          onChange={(event) => setBranchFilter(event.target.value)}
+          className="border border-gray-300 rounded px-3 py-2 text-sm"
+        >
+          <option value="all">All Branches</option>
+          {branches.map((branch) => (
+            <option key={branch.value} value={branch.value}>
+              {branch.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="bg-white border border-gray-200 rounded-xl h-[72vh] overflow-auto">
         <table className="w-full text-sm">

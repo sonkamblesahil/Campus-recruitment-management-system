@@ -18,6 +18,9 @@ export default function LoginPage() {
     const result = await loginAction(formData);
 
     if (!result?.success) {
+      if (result?.code === "not-verified") {
+        window.alert(result.error || "Your account is not verified yet.");
+      }
       setError(result?.error || "Login failed");
       setIsLoading(false);
       return;
@@ -33,6 +36,7 @@ export default function LoginPage() {
         branch: result.branch,
         program: result.program,
         year: result.year,
+        isProfileVerified: result.isProfileVerified,
       }),
     );
     window.dispatchEvent(new Event("auth-user-changed"));

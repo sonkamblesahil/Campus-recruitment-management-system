@@ -26,6 +26,10 @@ function normalizeEmail(value) {
     .toLowerCase();
 }
 
+function escapeRegex(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function normalizePassword(value) {
   return String(value || "").trim();
 }
@@ -50,6 +54,9 @@ async function ensureSuperAdminAccount() {
         name: SUPER_ADMIN_NAME,
         password: SUPER_ADMIN_PASSWORD,
         role: APP_ROLES.SUPERADMIN,
+        isProfileVerified: true,
+        profileVerifiedAt: null,
+        profileVerifiedBy: null,
         isBanned: false,
         banReason: "",
         bannedAt: null,
@@ -124,6 +131,9 @@ export async function signupAction(formData) {
     userPayload.branch = branch;
     userPayload.program = program;
     userPayload.year = year;
+    userPayload.isProfileVerified = false;
+    userPayload.profileVerifiedAt = null;
+    userPayload.profileVerifiedBy = null;
   }
 
   if (role === APP_ROLES.ADMIN && branch) {
@@ -131,6 +141,11 @@ export async function signupAction(formData) {
   }
 
   const user = await User.create(userPayload);
+  const normalizedUserRole = normalizeRole(user.role);
+  const isProfileVerified =
+    normalizedUserRole === APP_ROLES.STUDENT
+      ? Boolean(user.isProfileVerified)
+      : true;
 
   // If student, create an empty profile
   if (role === APP_ROLES.STUDENT) {
@@ -140,6 +155,7 @@ export async function signupAction(formData) {
       basic: { name, email },
       academic: {
         department: branch,
+        currentSemester: String(year || ""),
       },
     });
   }
@@ -149,10 +165,11 @@ export async function signupAction(formData) {
     userId: String(user._id),
     name: user.name,
     email: user.email,
-    role: normalizeRole(user.role),
+    role: normalizedUserRole,
     branch: user.branch || "",
     program: user.program || "",
     year: user.year || null,
+    isProfileVerified,
   };
 }
 
@@ -167,10 +184,75 @@ export async function loginAction(formData) {
   await connectToDatabase();
   await ensureSuperAdminAccount();
 
-  const user = await User.findOne({ email, password });
-  if (!user) {
+  const emailRegex = new RegExp(`^${escapeRegex(email)}$`, "i");
+  const users = await User.collection
+    .find({ email: emailRegex })
+    .sort({ updatedAt: -1, createdAt: -1 })
+    .toArray();
+
+  if (!users.length) {
     return { success: false, error: "Invalid credentials" };
   }
+
+  const passwordMatchedUsers = users.filter(
+    (candidate) => normalizePassword(candidate.password) === password,
+  );
+
+  if (!passwordMatchedUsers.length) {
+    return { success: false, error: "Invalid credentials" };
+  }
+
+  const user =
+    passwordMatchedUsers.find((candidate) => {
+      const role = normalizeRole(candidate.role);
+      if (!candidate.isDismissed && !candidate.isBanned) {
+        if (role !== APP_ROLES.STUDENT) {
+          return true;
+        }
+
+        return (
+          Boolean(candidate.isProfileVerified) ||
+          Boolean(candidate.profileVerifiedAt) ||
+          Boolean(candidate.profileVerifiedBy)
+        );
+      }
+
+      if (role !== APP_ROLES.STUDENT) {
+        return true;
+      }
+
+      return (
+        Boolean(candidate.isProfileVerified) ||
+        Boolean(candidate.profileVerifiedAt) ||
+        Boolean(candidate.profileVerifiedBy)
+      );
+    }) || passwordMatchedUsers[0];
+
+  const normalizedUserRole = normalizeRole(user.role);
+  const hasVerificationMarker =
+    Boolean(user.isProfileVerified) ||
+    Boolean(user.profileVerifiedAt) ||
+    Boolean(user.profileVerifiedBy);
+
+  if (
+    normalizedUserRole === APP_ROLES.STUDENT &&
+    !Boolean(user.isProfileVerified) &&
+    hasVerificationMarker
+  ) {
+    await User.collection.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          isProfileVerified: true,
+        },
+      },
+    );
+  }
+
+  const isProfileVerified =
+    normalizedUserRole === APP_ROLES.STUDENT
+      ? Boolean(user.isProfileVerified) || hasVerificationMarker
+      : true;
 
   if (user.isDismissed) {
     return {
@@ -188,15 +270,25 @@ export async function loginAction(formData) {
     };
   }
 
+  if (normalizedUserRole === APP_ROLES.STUDENT && !isProfileVerified) {
+    return {
+      success: false,
+      code: "not-verified",
+      error:
+        "Your account is not verified by your department admin yet. Please wait for verification.",
+    };
+  }
+
   return {
     success: true,
     userId: String(user._id),
     name: user.name,
     email: user.email,
-    role: normalizeRole(user.role),
+    role: normalizedUserRole,
     branch: user.branch || "",
     program: user.program || "",
     year: user.year || null,
+    isProfileVerified,
   };
 }
 

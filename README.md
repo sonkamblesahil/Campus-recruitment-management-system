@@ -24,6 +24,8 @@ Core capabilities include:
 - Admin application review and offer issuance
 - Interview scheduling and status tracking
 - Superadmin controls for admin assignment, ban, and dismiss/restore workflows
+- Governance activity logs for superadmin actions with filters and CSV export
+- CSV export of filtered student management results
 - Placement analytics dashboard
 - Eligible student export to Excel
 
@@ -78,6 +80,8 @@ Important files:
 - app/analytics/actions.js
 - app/dashboard/actions.js
 - app/superadmin/actions.js
+- app/superadmin/activity/page.jsx
+- models/AuditLog.js
 
 ## 5. Prerequisites
 
@@ -256,6 +260,13 @@ Guarding is done in components/AppShell.jsx:
 - userId, token, expiresAt
 - TTL index auto-expires tokens
 
+### AuditLog
+
+- actor details (superadmin), action, severity
+- target user snapshot (name, email, role)
+- structured previous/next state details for governance changes
+- timestamped event history for filtered audit views and CSV export
+
 ## 11. Server Action Map
 
 ### Student-facing
@@ -299,6 +310,7 @@ Guarding is done in components/AppShell.jsx:
 
 - app/superadmin/actions.js
   - getSuperAdminOverviewAction
+  - getGovernanceActivityAction
   - getAdminManagementAction
   - assignAdminBranchAction
   - clearAdminBranchAction
@@ -351,7 +363,7 @@ npm run build
 - Auth is localStorage-based and client-enforced.
 - Passwords are not hashed by design in this repository.
 - Password reset does not send emails; reset URL is generated in app flow.
-- Superadmin controls are currently implemented via dedicated pages, not a centralized audit/event trail.
+- Governance audit trail currently focuses on superadmin actions and does not yet cover every student/admin page event.
 
 ## 16. Recommended Next Improvements
 
@@ -360,7 +372,7 @@ npm run build
 - Add automated tests (unit + integration).
 - Add centralized API/service layer for validation reuse.
 - Add .env.example for onboarding consistency.
-- Add audit logs for superadmin governance actions (ban/dismiss/branch assignment).
+- Extend governance auditing to additional operational areas beyond superadmin actions.
 
 ## 17. Quick Health Check
 

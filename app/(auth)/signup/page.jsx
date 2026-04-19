@@ -35,6 +35,15 @@ export default function SignupPage() {
       return;
     }
 
+    if (result.role === "student" && !result.isProfileVerified) {
+      window.alert(
+        "Your account is created, but your department admin must verify your profile before you can login.",
+      );
+      setIsLoading(false);
+      router.push("/login");
+      return;
+    }
+
     localStorage.setItem(
       "auth_user",
       JSON.stringify({
@@ -45,6 +54,7 @@ export default function SignupPage() {
         branch: result.branch,
         program: result.program,
         year: result.year,
+        isProfileVerified: result.isProfileVerified,
       }),
     );
     window.dispatchEvent(new Event("auth-user-changed"));

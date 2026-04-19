@@ -1,5 +1,7 @@
 "use server";
 
+import { isValidBranch, normalizeBranch } from "@/lib/academics";
+import { isAdminRole } from "@/lib/authRoles";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import Profile from "@/models/Profile";
@@ -51,8 +53,11 @@ export async function getProfileAction(userId) {
         },
         academic: {
           currentInstitute: "",
-          department: "",
-          currentSemester: "",
+          department: user.branch || "",
+          currentSemester:
+            user.year === null || user.year === undefined
+              ? ""
+              : String(user.year),
           cgpa: "",
         },
         semesterMarks: [],
@@ -80,8 +85,12 @@ export async function getProfileAction(userId) {
       },
       academic: {
         currentInstitute: existingProfile.academic?.currentInstitute || "",
-        department: existingProfile.academic?.department || "",
-        currentSemester: existingProfile.academic?.currentSemester || "",
+        department: existingProfile.academic?.department || user.branch || "",
+        currentSemester:
+          existingProfile.academic?.currentSemester ||
+          (user.year === null || user.year === undefined
+            ? ""
+            : String(user.year)),
         cgpa: existingProfile.academic?.cgpa || "",
       },
       semesterMarks: existingProfile.semesterMarks || [],
@@ -126,8 +135,13 @@ export async function saveProfileAction(userId, profileData) {
       currentInstitute: normalizeString(
         profileData?.academic?.currentInstitute,
       ),
-      department: normalizeString(profileData?.academic?.department),
-      currentSemester: normalizeString(profileData?.academic?.currentSemester),
+      department:
+        normalizeString(profileData?.academic?.department) || user.branch || "",
+      currentSemester:
+        normalizeString(profileData?.academic?.currentSemester) ||
+        (user.year === null || user.year === undefined
+          ? ""
+          : String(user.year)),
       cgpa: normalizeString(profileData?.academic?.cgpa),
     },
     semesterMarks: cleanArray(profileData?.semesterMarks).map((item) => ({
@@ -186,6 +200,19 @@ export async function saveProfileAction(userId, profileData) {
       duration: normalizeString(item.duration),
     })),
   };
+
+  if (isAdminRole(user.role)) {
+    const nextBranch = normalizeBranch(normalizedData.academic.department);
+
+    if (nextBranch && !isValidBranch(nextBranch)) {
+      return { success: false, error: "Please select a valid department" };
+    }
+
+    if (nextBranch && normalizeBranch(user.branch) !== nextBranch) {
+      user.branch = nextBranch;
+      await user.save();
+    }
+  }
 
   await Profile.findOneAndUpdate(
     { userId: normalizedUserId },

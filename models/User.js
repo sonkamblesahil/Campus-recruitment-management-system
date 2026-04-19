@@ -81,6 +81,22 @@ const userSchema = new mongoose.Schema(
       max: 4,
       index: true,
     },
+    isProfileVerified: {
+      type: Boolean,
+      default: function defaultVerificationState() {
+        return normalizeRole(this.role) !== APP_ROLES.STUDENT;
+      },
+      index: true,
+    },
+    profileVerifiedAt: {
+      type: Date,
+      default: null,
+    },
+    profileVerifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
     isBanned: {
       type: Boolean,
       default: false,
