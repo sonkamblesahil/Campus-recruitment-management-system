@@ -2,7 +2,19 @@
 
 import { randomUUID } from "crypto";
 import { APP_ROLES, normalizeRole } from "@/lib/authRoles";
+import {
+  isValidBranch,
+  isValidProgram,
+  isValidYearForProgram,
+  normalizeBranch,
+  normalizeProgram,
+} from "@/lib/academics";
 import { connectToDatabase } from "@/lib/mongodb";
+import {
+  SUPER_ADMIN_EMAIL,
+  SUPER_ADMIN_NAME,
+  SUPER_ADMIN_PASSWORD,
+} from "@/lib/superAdmin";
 import ResetToken from "@/models/ResetToken";
 import User from "@/models/User";
 
@@ -18,11 +30,52 @@ function normalizePassword(value) {
   return String(value || "").trim();
 }
 
+function normalizeYear(value) {
+  const parsedYear = Number.parseInt(String(value || ""), 10);
+  if (!Number.isFinite(parsedYear)) {
+    return null;
+  }
+
+  return parsedYear;
+}
+
+async function ensureSuperAdminAccount() {
+  await User.findOneAndUpdate(
+    { email: SUPER_ADMIN_EMAIL },
+    {
+      $setOnInsert: {
+        email: SUPER_ADMIN_EMAIL,
+      },
+      $set: {
+        name: SUPER_ADMIN_NAME,
+        password: SUPER_ADMIN_PASSWORD,
+        role: APP_ROLES.SUPERADMIN,
+        isBanned: false,
+        banReason: "",
+        bannedAt: null,
+        isDismissed: false,
+        dismissalReason: "",
+        dismissedAt: null,
+        dismissedBy: null,
+      },
+    },
+    {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+      runValidators: true,
+    },
+  );
+}
+
 export async function signupAction(formData) {
   const name = String(formData.get("name") || "").trim();
   const email = normalizeEmail(formData.get("email"));
   const password = normalizePassword(formData.get("password"));
   const role = normalizeRole(formData.get("role"));
+  const branch = normalizeBranch(formData.get("branch"));
+  const program = normalizeProgram(formData.get("program"));
+  const year = normalizeYear(formData.get("year"));
   const allowedRoles = [APP_ROLES.ADMIN, APP_ROLES.STUDENT];
 
   if (!name || !email || !password || !role) {
@@ -33,14 +86,51 @@ export async function signupAction(formData) {
     return { success: false, error: "Please select a valid user type" };
   }
 
+  if (email === SUPER_ADMIN_EMAIL) {
+    return {
+      success: false,
+      error: "This email is reserved for superadmin access",
+    };
+  }
+
+  if (role === APP_ROLES.STUDENT) {
+    if (!isValidBranch(branch)) {
+      return { success: false, error: "Please select a valid branch" };
+    }
+
+    if (!isValidProgram(program)) {
+      return { success: false, error: "Please select a valid program" };
+    }
+
+    if (!isValidYearForProgram(program, year)) {
+      return { success: false, error: "Please select a valid year" };
+    }
+  }
+
+  if (role === APP_ROLES.ADMIN && branch && !isValidBranch(branch)) {
+    return { success: false, error: "Please select a valid branch" };
+  }
+
   await connectToDatabase();
+  await ensureSuperAdminAccount();
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return { success: false, error: "Email already registered" };
   }
 
-  const user = await User.create({ name, email, password, role });
+  const userPayload = { name, email, password, role };
+  if (role === APP_ROLES.STUDENT) {
+    userPayload.branch = branch;
+    userPayload.program = program;
+    userPayload.year = year;
+  }
+
+  if (role === APP_ROLES.ADMIN && branch) {
+    userPayload.branch = branch;
+  }
+
+  const user = await User.create(userPayload);
 
   // If student, create an empty profile
   if (role === APP_ROLES.STUDENT) {
@@ -48,6 +138,9 @@ export async function signupAction(formData) {
     await Profile.create({
       userId: user._id,
       basic: { name, email },
+      academic: {
+        department: branch,
+      },
     });
   }
 
@@ -57,6 +150,9 @@ export async function signupAction(formData) {
     name: user.name,
     email: user.email,
     role: normalizeRole(user.role),
+    branch: user.branch || "",
+    program: user.program || "",
+    year: user.year || null,
   };
 }
 
@@ -69,10 +165,27 @@ export async function loginAction(formData) {
   }
 
   await connectToDatabase();
+  await ensureSuperAdminAccount();
 
   const user = await User.findOne({ email, password });
   if (!user) {
     return { success: false, error: "Invalid credentials" };
+  }
+
+  if (user.isDismissed) {
+    return {
+      success: false,
+      error: "Your account has been dismissed. Contact the superadmin.",
+    };
+  }
+
+  if (user.isBanned) {
+    return {
+      success: false,
+      error: user.banReason
+        ? `Your account is banned: ${user.banReason}`
+        : "Your account is banned. Contact the superadmin.",
+    };
   }
 
   return {
@@ -81,6 +194,9 @@ export async function loginAction(formData) {
     name: user.name,
     email: user.email,
     role: normalizeRole(user.role),
+    branch: user.branch || "",
+    program: user.program || "",
+    year: user.year || null,
   };
 }
 

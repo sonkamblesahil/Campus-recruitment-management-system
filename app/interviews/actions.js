@@ -1,6 +1,7 @@
 "use server";
 
 import mongoose from "mongoose";
+import { normalizeBranch } from "@/lib/academics";
 import { isAdminRole, isStudentRole } from "@/lib/authRoles";
 import { connectToDatabase } from "@/lib/mongodb";
 import Interview from "@/models/Interview";
@@ -57,8 +58,25 @@ export async function scheduleInterviewAction(adminId, payload) {
   const { applicationId, title, scheduledDate, meetingLink, instructions } =
     payload;
 
-  const app = await Application.findById(applicationId).populate("jobId");
+  const app = await Application.findById(applicationId)
+    .populate("jobId")
+    .populate({ path: "studentId", select: "branch", model: User });
   if (!app) return { success: false, error: "Application not found" };
+
+  if (String(app.jobId?.createdBy || "") !== String(admin._id)) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const adminBranch = normalizeBranch(admin.branch);
+  if (adminBranch) {
+    const studentBranch = normalizeBranch(app.studentId?.branch);
+    if (studentBranch !== adminBranch) {
+      return {
+        success: false,
+        error: "You can schedule interviews only for your assigned department",
+      };
+    }
+  }
 
   const interview = await Interview.create({
     applicationId: app._id,

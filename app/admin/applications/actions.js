@@ -1,6 +1,7 @@
 "use server";
 
 import mongoose from "mongoose";
+import { normalizeBranch } from "@/lib/academics";
 import { isAdminRole } from "@/lib/authRoles";
 import { connectToDatabase } from "@/lib/mongodb";
 import Job from "@/models/Job";
@@ -30,9 +31,13 @@ export async function getAdminApplicationsAction(userId, jobId = null) {
   await connectToDatabase();
   const adminResult = await requireAdmin(userId);
   if (!adminResult.success) return adminResult;
+  const adminBranch = normalizeBranch(adminResult.user?.branch);
 
   // Find all jobs created by this admin
   const jobsQuery = { createdBy: adminResult.userId };
+  if (adminBranch) {
+    jobsQuery["eligibility.departments"] = adminBranch;
+  }
   if (jobId) {
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       return { success: false, error: "Invalid job ID" };
@@ -91,6 +96,7 @@ export async function updateApplicationStatusAction(
   await connectToDatabase();
   const adminResult = await requireAdmin(adminId);
   if (!adminResult.success) return adminResult;
+  const adminBranch = normalizeBranch(adminResult.user?.branch);
 
   if (!mongoose.Types.ObjectId.isValid(applicationId)) {
     return { success: false, error: "Invalid application ID" };
@@ -118,6 +124,18 @@ export async function updateApplicationStatusAction(
       success: false,
       error: "Unauthorized. You did not post this job.",
     };
+  }
+
+  if (adminBranch) {
+    const jobBranches = (application.jobId?.eligibility?.departments || []).map(
+      (dept) => normalizeBranch(dept),
+    );
+    if (!jobBranches.includes(adminBranch)) {
+      return {
+        success: false,
+        error: "Unauthorized for this department application",
+      };
+    }
   }
 
   application.status = newStatus;

@@ -2,14 +2,26 @@
 
 import { ArrowRight, GraduationCap, Lock, Mail, User } from "lucide-react";
 import { signupAction } from "../actions";
+import {
+  BRANCH_OPTIONS,
+  PROGRAM_OPTIONS,
+  getAllowedYears,
+} from "@/lib/academics";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function SignupPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("student");
+  const [selectedProgram, setSelectedProgram] = useState("btech");
   const router = useRouter();
+
+  const allowedYears = useMemo(
+    () => getAllowedYears(selectedProgram),
+    [selectedProgram],
+  );
 
   const handleSubmit = async (formData) => {
     setError("");
@@ -30,9 +42,17 @@ export default function SignupPage() {
         name: result.name,
         email: result.email,
         role: result.role,
+        branch: result.branch,
+        program: result.program,
+        year: result.year,
       }),
     );
     window.dispatchEvent(new Event("auth-user-changed"));
+
+    if (result.role === "superadmin") {
+      router.push("/superadmin");
+      return;
+    }
 
     if (result.role === "admin") {
       router.push("/admin/jobs");
@@ -128,6 +148,7 @@ export default function SignupPage() {
               <select
                 name="role"
                 defaultValue="student"
+                onChange={(event) => setSelectedRole(event.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
@@ -135,6 +156,67 @@ export default function SignupPage() {
                 <option value="admin">Admin</option>
               </select>
             </div>
+
+            <div>
+              <label className="text-sm font-medium flex items-center gap-2 mb-1">
+                <User className="w-4 h-4" /> Branch / Department
+              </label>
+              <select
+                name="branch"
+                defaultValue=""
+                className="w-full border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required={selectedRole === "student"}
+              >
+                <option value="">Select Branch</option>
+                {BRANCH_OPTIONS.map((branch) => (
+                  <option key={branch.value} value={branch.value}>
+                    {branch.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedRole === "student" ? (
+              <>
+                <div>
+                  <label className="text-sm font-medium flex items-center gap-2 mb-1">
+                    <User className="w-4 h-4" /> Program
+                  </label>
+                  <select
+                    name="program"
+                    value={selectedProgram}
+                    onChange={(event) => setSelectedProgram(event.target.value)}
+                    className="w-full border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    {PROGRAM_OPTIONS.map((program) => (
+                      <option key={program.value} value={program.value}>
+                        {program.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium flex items-center gap-2 mb-1">
+                    <User className="w-4 h-4" /> Year
+                  </label>
+                  <select
+                    name="year"
+                    defaultValue=""
+                    className="w-full border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select Year</option>
+                    {allowedYears.map((year) => (
+                      <option key={String(year)} value={String(year)}>
+                        Year {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : null}
 
             <button
               type="submit"

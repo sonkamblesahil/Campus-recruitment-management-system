@@ -30,9 +30,17 @@ export default function LoginPage() {
         name: result.name,
         email: result.email,
         role: result.role,
+        branch: result.branch,
+        program: result.program,
+        year: result.year,
       }),
     );
     window.dispatchEvent(new Event("auth-user-changed"));
+
+    if (result.role === "superadmin") {
+      router.push("/superadmin");
+      return;
+    }
 
     if (result.role === "admin") {
       router.push("/admin/jobs");

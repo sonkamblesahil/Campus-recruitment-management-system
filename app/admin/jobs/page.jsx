@@ -78,6 +78,14 @@ export default function AdminJobsPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
+  const enforcedBranch = useMemo(
+    () =>
+      String(authUser?.branch || "")
+        .trim()
+        .toUpperCase(),
+    [authUser?.branch],
+  );
+
   const activeJobCount = useMemo(
     () => jobs.filter((job) => job.active).length,
     [jobs],
@@ -136,7 +144,10 @@ export default function AdminJobsPage() {
     setMessage("");
     setSaving(true);
 
-    const result = await createJobAction(authUser.userId, form);
+    const payload = enforcedBranch
+      ? { ...form, departments: enforcedBranch }
+      : form;
+    const result = await createJobAction(authUser.userId, payload);
     if (!result?.success) {
       setError(result?.error || "Failed to create job");
       setSaving(false);
@@ -144,7 +155,11 @@ export default function AdminJobsPage() {
     }
 
     setMessage("Job created successfully.");
-    setForm(emptyForm);
+    setForm(
+      enforcedBranch
+        ? { ...emptyForm, departments: enforcedBranch }
+        : emptyForm,
+    );
     setSelectedJobId(result.data.id);
     await loadJobs(authUser.userId);
     setSaving(false);
@@ -161,7 +176,14 @@ export default function AdminJobsPage() {
     setMessage("");
     setSaving(true);
 
-    const result = await updateJobAction(authUser.userId, selectedJobId, form);
+    const payload = enforcedBranch
+      ? { ...form, departments: enforcedBranch }
+      : form;
+    const result = await updateJobAction(
+      authUser.userId,
+      selectedJobId,
+      payload,
+    );
     if (!result?.success) {
       setError(result?.error || "Failed to update job");
       setSaving(false);
@@ -359,14 +381,19 @@ export default function AdminJobsPage() {
             />
 
             <input
-              placeholder="Eligible Departments (comma separated)"
-              value={form.departments}
+              placeholder={
+                enforcedBranch
+                  ? "Department is enforced by superadmin assignment"
+                  : "Eligible Departments (comma separated)"
+              }
+              value={enforcedBranch || form.departments}
               onChange={(event) =>
                 setForm((prev) => ({
                   ...prev,
                   departments: event.target.value,
                 }))
               }
+              disabled={Boolean(enforcedBranch)}
               className="md:col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
             <input

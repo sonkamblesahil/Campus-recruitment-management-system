@@ -2,6 +2,7 @@
 
 import mongoose from "mongoose";
 import { isAdminRole } from "@/lib/authRoles";
+import { normalizeBranch } from "@/lib/academics";
 import { connectToDatabase } from "@/lib/mongodb";
 import {
   getStudentAttributes,
@@ -45,7 +46,7 @@ function toNumber(value) {
 function normalizeDepartments(value) {
   return normalizeText(value)
     .split(",")
-    .map((part) => part.trim())
+    .map((part) => normalizeBranch(part))
     .filter(Boolean);
 }
 
@@ -63,7 +64,12 @@ async function requireAdmin(userId) {
   return { success: true, userId: normalizedUserId, user };
 }
 
-function buildJobPayload(payload) {
+function buildJobPayload(payload, adminUser) {
+  const adminBranch = normalizeBranch(adminUser?.branch);
+  const departments = adminBranch
+    ? [adminBranch]
+    : normalizeDepartments(payload?.departments);
+
   return {
     title: normalizeText(payload?.title),
     company: normalizeText(payload?.company),
@@ -71,7 +77,7 @@ function buildJobPayload(payload) {
     packageCtc: normalizeText(payload?.packageCtc),
     description: normalizeText(payload?.description),
     eligibility: {
-      departments: normalizeDepartments(payload?.departments),
+      departments,
       minCgpa: toNumber(payload?.minCgpa),
       minClass12Percentage: toNumber(payload?.minClass12Percentage),
       minSemester: toNumber(payload?.minSemester),
@@ -108,7 +114,7 @@ export async function createJobAction(userId, payload) {
     return adminResult;
   }
 
-  const jobPayload = buildJobPayload(payload);
+  const jobPayload = buildJobPayload(payload, adminResult.user);
 
   if (!jobPayload.title || !jobPayload.company) {
     return { success: false, error: "Job title and company are required" };
@@ -144,7 +150,7 @@ export async function updateJobAction(userId, jobId, payload) {
     return { success: false, error: "You can only update your own jobs" };
   }
 
-  const jobPayload = buildJobPayload(payload);
+  const jobPayload = buildJobPayload(payload, adminResult.user);
   if (!jobPayload.title || !jobPayload.company) {
     return { success: false, error: "Job title and company are required" };
   }
@@ -197,7 +203,25 @@ export async function getEligibleStudentsForJobAction(userId, jobId) {
     return { success: false, error: "Unauthorized" };
   }
 
-  const students = await User.find({ role: { $regex: /^student$/i } }).lean();
+  const adminBranch = normalizeBranch(adminResult.user?.branch);
+  if (adminBranch) {
+    const jobBranches = (job.eligibility?.departments || []).map((dept) =>
+      normalizeBranch(dept),
+    );
+    if (!jobBranches.includes(adminBranch)) {
+      return {
+        success: false,
+        error: "Unauthorized for this department job",
+      };
+    }
+  }
+
+  const studentQuery = { role: { $regex: /^student$/i } };
+  if (adminBranch) {
+    studentQuery.branch = adminBranch;
+  }
+
+  const students = await User.find(studentQuery).lean();
   const studentIds = students.map((student) => student._id);
   const profiles = await Profile.find({ userId: { $in: studentIds } }).lean();
   const profileMap = new Map(

@@ -1,18 +1,18 @@
 "use client";
 
-import { APP_ROLES, isAdminRole } from "@/lib/authRoles";
+import { APP_ROLES, isAdminRole, isSuperAdminRole } from "@/lib/authRoles";
+import {
+  BriefcaseIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  DocumentTextIcon,
+  GiftIcon,
+  HomeIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  HomeIcon,
-  BriefcaseIcon,
-  DocumentTextIcon,
-  GiftIcon,
-  ChartBarIcon,
-  UserIcon,
-  CalendarIcon,
-} from "@heroicons/react/24/outline";
 
 const studentNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
@@ -35,6 +35,25 @@ const adminNavItems = [
   { href: "/analytics", label: "Placement Analytics", icon: ChartBarIcon },
 ];
 
+const superAdminNavItems = [
+  { href: "/superadmin", label: "Superadmin Dashboard", icon: HomeIcon },
+  {
+    href: "/superadmin/admins",
+    label: "Admin Department Control",
+    icon: BriefcaseIcon,
+  },
+  {
+    href: "/superadmin/students",
+    label: "Student Management",
+    icon: UserIcon,
+  },
+  {
+    href: "/superadmin/dismissals",
+    label: "Dismissals and Bans",
+    icon: DocumentTextIcon,
+  },
+];
+
 export default function SideBar() {
   const pathname = usePathname();
   const [role, setRole] = useState(APP_ROLES.STUDENT);
@@ -49,9 +68,17 @@ export default function SideBar() {
         }
 
         const parsedUser = JSON.parse(rawUser);
-        setRole(
-          isAdminRole(parsedUser?.role) ? APP_ROLES.ADMIN : APP_ROLES.STUDENT,
-        );
+        if (isSuperAdminRole(parsedUser?.role)) {
+          setRole(APP_ROLES.SUPERADMIN);
+          return;
+        }
+
+        if (isAdminRole(parsedUser?.role)) {
+          setRole(APP_ROLES.ADMIN);
+          return;
+        }
+
+        setRole(APP_ROLES.STUDENT);
       } catch {
         setRole(APP_ROLES.STUDENT);
       }
@@ -67,11 +94,15 @@ export default function SideBar() {
     };
   }, []);
 
-  const navItems = role === APP_ROLES.ADMIN ? adminNavItems : studentNavItems;
+  const navItems =
+    role === APP_ROLES.SUPERADMIN
+      ? superAdminNavItems
+      : role === APP_ROLES.ADMIN
+        ? adminNavItems
+        : studentNavItems;
 
   return (
     <nav className="h-full bg-gray-900/95 md:group-hover/sidebar:bg-gray-900/60 backdrop-blur-md text-white shadow-2xl flex flex-col transition-colors duration-300">
-      {/* Navigation */}
       <ul className="flex-1 p-3 space-y-4 mt-10">
         {navItems.map((item) => {
           const Icon = item.icon;

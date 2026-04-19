@@ -1,12 +1,21 @@
 "use client";
 
-import { APP_ROLES, isAdminRole, isStudentRole } from "@/lib/authRoles";
+import {
+  APP_ROLES,
+  isAdminRole,
+  isStudentRole,
+  isSuperAdminRole,
+} from "@/lib/authRoles";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Navbar from "./NavBar";
 import SideBar from "./SideBar";
 
 const subscribe = (onStoreChange) => {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
   const handleChange = () => onStoreChange();
   window.addEventListener("storage", handleChange);
   window.addEventListener("auth-user-changed", handleChange);
@@ -16,8 +25,14 @@ const subscribe = (onStoreChange) => {
     window.removeEventListener("auth-user-changed", handleChange);
   };
 };
+
 const getServerSnapshot = () => false;
-const getClientSnapshot = () => Boolean(localStorage.getItem("auth_user"));
+const getClientSnapshot = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return Boolean(localStorage.getItem("auth_user"));
+};
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
@@ -31,7 +46,12 @@ export default function AppShell({ children }) {
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
     pathname === "/reset-password";
+
   const isAdminPath = pathname.startsWith("/admin");
+  const isSuperAdminPath = pathname.startsWith("/superadmin");
+  const isAdminSharedPath =
+    pathname.startsWith("/interviews") || pathname.startsWith("/analytics");
+
   const isAuthenticated = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -48,9 +68,17 @@ export default function AppShell({ children }) {
         }
 
         const parsedUser = JSON.parse(rawUser);
-        setRole(
-          isAdminRole(parsedUser?.role) ? APP_ROLES.ADMIN : APP_ROLES.STUDENT,
-        );
+        if (isSuperAdminRole(parsedUser?.role)) {
+          setRole(APP_ROLES.SUPERADMIN);
+          return;
+        }
+
+        if (isAdminRole(parsedUser?.role)) {
+          setRole(APP_ROLES.ADMIN);
+          return;
+        }
+
+        setRole(APP_ROLES.STUDENT);
       } catch {
         setRole(APP_ROLES.STUDENT);
       }
@@ -73,6 +101,11 @@ export default function AppShell({ children }) {
     }
 
     if (isAuthPage && isAuthenticated) {
+      if (isSuperAdminRole(role)) {
+        router.replace("/superadmin");
+        return;
+      }
+
       if (isAdminRole(role)) {
         router.replace("/admin/jobs");
         return;
@@ -82,18 +115,54 @@ export default function AppShell({ children }) {
       return;
     }
 
-    if (!isAuthPage && isAuthenticated && isAdminRole(role) && !isAdminPath) {
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      isSuperAdminRole(role) &&
+      !isSuperAdminPath
+    ) {
+      router.replace("/superadmin");
+      return;
+    }
+
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      isAdminRole(role) &&
+      !(isAdminPath || isAdminSharedPath)
+    ) {
       router.replace("/admin/jobs");
       return;
     }
 
-    if (!isAuthPage && isAuthenticated && isStudentRole(role) && isAdminPath) {
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      isStudentRole(role) &&
+      (isAdminPath || isSuperAdminPath)
+    ) {
       router.replace("/dashboard");
       return;
     }
-  }, [isAdminPath, isAuthPage, isAuthenticated, role, router]);
 
-  // Auth pages: no navbar / sidebar
+    if (
+      !isAuthPage &&
+      isAuthenticated &&
+      isAdminRole(role) &&
+      isSuperAdminPath
+    ) {
+      router.replace("/admin/jobs");
+    }
+  }, [
+    isAdminPath,
+    isAdminSharedPath,
+    isAuthPage,
+    isAuthenticated,
+    isSuperAdminPath,
+    role,
+    router,
+  ]);
+
   if (isAuthPage) {
     if (isAuthenticated) {
       return null;
@@ -105,42 +174,32 @@ export default function AppShell({ children }) {
     return null;
   }
 
-  const showNavbar = true;
-  const isSidebarOpen = sidebarOpen;
   const sidebarTopOffsetClass = "top-14 h-[calc(100vh-56px)]";
 
   return (
     <div className="bg-gray-900 min-h-screen flex flex-col">
-      {/* Top Navbar */}
-      {showNavbar ? (
-        <header className="h-14 shrink-0">
-          <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        </header>
-      ) : null}
+      <header className="h-14 shrink-0">
+        <Navbar onMenuClick={() => setSidebarOpen(true)} />
+      </header>
 
-      {/* App Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {showNavbar && sidebarOpen && (
+        {sidebarOpen ? (
           <button
             type="button"
             aria-label="Close menu overlay"
             onClick={() => setSidebarOpen(false)}
             className="fixed inset-0 bg-black/40 z-20 md:hidden"
           />
-        )}
+        ) : null}
 
-        {/* Sidebar */}
         <aside
           className={`group/sidebar fixed md:static left-0 ${sidebarTopOffsetClass} md:h-auto w-58 md:w-20 md:hover:w-58 overflow-hidden border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
-            isSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full md:translate-x-0"
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}
         >
           <SideBar />
         </aside>
 
-        {/* Main Page Content */}
         <main className="flex-1 p-1 md:p-2 overflow-y-auto rounded-xl bg-gray-200">
           {children}
         </main>
