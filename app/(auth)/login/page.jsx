@@ -39,11 +39,6 @@ export default function LoginPage() {
       return;
     }
 
-    if (result.role === "recruiter") {
-      router.push("/recruiter/jobs");
-      return;
-    }
-
     router.push("/dashboard");
   };
 
@@ -111,6 +106,14 @@ export default function LoginPage() {
                 className="w-full border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
+              <div className="mt-2 text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             <button

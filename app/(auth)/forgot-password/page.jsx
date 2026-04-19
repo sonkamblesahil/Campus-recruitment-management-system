@@ -1,45 +1,36 @@
 "use client";
 
-import { ArrowRight, GraduationCap, Lock, Mail, User } from "lucide-react";
-import { signupAction } from "../actions";
+import { ArrowRight, GraduationCap, Mail } from "lucide-react";
+import { requestPasswordResetAction } from "../actions";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function SignupPage() {
+export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [resetUrl, setResetUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (formData) => {
     setError("");
+    setMessage("");
+    setResetUrl("");
     setIsLoading(true);
 
-    const result = await signupAction(formData);
+    const result = await requestPasswordResetAction(formData);
 
     if (!result?.success) {
-      setError(result?.error || "Signup failed");
+      setError(result?.error || "Unable to process request");
       setIsLoading(false);
       return;
     }
 
-    localStorage.setItem(
-      "auth_user",
-      JSON.stringify({
-        userId: result.userId,
-        name: result.name,
-        email: result.email,
-        role: result.role,
-      }),
+    setMessage(
+      result.message ||
+        "If this email exists in our records, a reset link has been generated.",
     );
-    window.dispatchEvent(new Event("auth-user-changed"));
-
-    if (result.role === "admin") {
-      router.push("/admin/jobs");
-      return;
-    }
-
-    router.push("/dashboard");
+    setResetUrl(result.resetUrl || "");
+    setIsLoading(false);
   };
 
   return (
@@ -59,12 +50,12 @@ export default function SignupPage() {
           </div>
 
           <h2 className="text-3xl lg:text-4xl font-bold mb-5 leading-tight">
-            Campus Recruitment <br /> Management System
+            Forgot Password
           </h2>
 
           <p className="text-base lg:text-lg text-gray-300 leading-relaxed">
-            Create your account to manage your placement profile and track every
-            stage of recruitment.
+            Enter your registered email to generate a secure password reset
+            link.
           </p>
         </div>
       </div>
@@ -72,7 +63,7 @@ export default function SignupPage() {
       <div className="flex items-center justify-center bg-gray-100 px-6 py-8">
         <div className="w-full max-w-sm bg-white p-6 shadow-md border border-gray-200">
           <h3 className="text-2xl font-semibold text-center mb-6">
-            Create Account
+            Reset Access
           </h3>
 
           {error && (
@@ -81,23 +72,24 @@ export default function SignupPage() {
             </p>
           )}
 
+          {message && (
+            <div className="mb-4 border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 space-y-2">
+              <p>{message}</p>
+              {resetUrl && (
+                <p>
+                  Reset Link:{" "}
+                  <Link href={resetUrl} className="underline font-medium">
+                    {resetUrl}
+                  </Link>
+                </p>
+              )}
+            </div>
+          )}
+
           <form className="space-y-4" action={handleSubmit}>
             <div>
               <label className="text-sm font-medium flex items-center gap-2 mb-1">
-                <User className="w-4 h-4" /> Full Name
-              </label>
-              <input
-                name="name"
-                type="text"
-                placeholder="Enter your full name"
-                className="w-full border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium flex items-center gap-2 mb-1">
-                <Mail className="w-4 h-4" /> Email
+                <Mail className="w-4 h-4" /> Registered Email
               </label>
               <input
                 name="email"
@@ -108,46 +100,18 @@ export default function SignupPage() {
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium flex items-center gap-2 mb-1">
-                <Lock className="w-4 h-4" /> Password
-              </label>
-              <input
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                className="w-full border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium flex items-center gap-2 mb-1">
-                <User className="w-4 h-4" /> User Type
-              </label>
-              <select
-                name="role"
-                defaultValue="student"
-                className="w-full border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              >
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium py-2.5 transition flex items-center justify-center gap-2"
             >
-              {isLoading ? "Creating Account..." : "Sign Up"}
+              {isLoading ? "Generating Link..." : "Generate Reset Link"}
               {!isLoading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
 
           <p className="text-sm text-gray-500 text-center mt-4">
-            Already have an account?{" "}
+            Back to{" "}
             <Link
               href="/login"
               className="text-indigo-600 hover:text-indigo-700 font-medium"

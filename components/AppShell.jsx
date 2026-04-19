@@ -1,5 +1,6 @@
 "use client";
 
+import { APP_ROLES, isAdminRole, isStudentRole } from "@/lib/authRoles";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Navbar from "./NavBar";
@@ -22,13 +23,15 @@ export default function AppShell({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState(APP_ROLES.STUDENT);
 
   const isAuthPage =
-    pathname === "/" || pathname === "/login" || pathname === "/signup";
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password";
   const isAdminPath = pathname.startsWith("/admin");
-  const isRecruiterPath = pathname.startsWith("/recruiter");
-  const isPrivilegedPath = isAdminPath || isRecruiterPath;
   const isAuthenticated = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -40,18 +43,16 @@ export default function AppShell({ children }) {
       try {
         const rawUser = localStorage.getItem("auth_user");
         if (!rawUser) {
-          setRole("student");
+          setRole(APP_ROLES.STUDENT);
           return;
         }
 
         const parsedUser = JSON.parse(rawUser);
         setRole(
-          parsedUser?.role === "admin" || parsedUser?.role === "recruiter"
-            ? parsedUser.role
-            : "student",
+          isAdminRole(parsedUser?.role) ? APP_ROLES.ADMIN : APP_ROLES.STUDENT,
         );
       } catch {
-        setRole("student");
+        setRole(APP_ROLES.STUDENT);
       }
     };
 
@@ -72,72 +73,25 @@ export default function AppShell({ children }) {
     }
 
     if (isAuthPage && isAuthenticated) {
-      if (role === "admin") {
+      if (isAdminRole(role)) {
         router.replace("/admin/jobs");
         return;
       }
 
-      if (role === "recruiter") {
-        router.replace("/recruiter/jobs");
-        return;
-      }
-
       router.replace("/dashboard");
       return;
     }
 
-    if (!isAuthPage && isAuthenticated && role === "admin" && !isAdminPath) {
+    if (!isAuthPage && isAuthenticated && isAdminRole(role) && !isAdminPath) {
       router.replace("/admin/jobs");
       return;
     }
 
-    if (
-      !isAuthPage &&
-      isAuthenticated &&
-      role === "recruiter" &&
-      !isRecruiterPath
-    ) {
-      router.replace("/recruiter/jobs");
-      return;
-    }
-
-    if (
-      !isAuthPage &&
-      isAuthenticated &&
-      role === "student" &&
-      isPrivilegedPath
-    ) {
+    if (!isAuthPage && isAuthenticated && isStudentRole(role) && isAdminPath) {
       router.replace("/dashboard");
       return;
     }
-
-    if (
-      !isAuthPage &&
-      isAuthenticated &&
-      role === "admin" &&
-      isRecruiterPath
-    ) {
-      router.replace("/admin/jobs");
-      return;
-    }
-
-    if (
-      !isAuthPage &&
-      isAuthenticated &&
-      role === "recruiter" &&
-      isAdminPath
-    ) {
-      router.replace("/recruiter/jobs");
-    }
-  }, [
-    isAdminPath,
-    isAuthPage,
-    isAuthenticated,
-    isPrivilegedPath,
-    isRecruiterPath,
-    role,
-    router,
-  ]);
+  }, [isAdminPath, isAuthPage, isAuthenticated, role, router]);
 
   // Auth pages: no navbar / sidebar
   if (isAuthPage) {

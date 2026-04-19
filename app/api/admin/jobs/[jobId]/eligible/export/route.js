@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import * as XLSX from "xlsx";
+import { isAdminRole } from "@/lib/authRoles";
 import { connectToDatabase } from "@/lib/mongodb";
 import {
   getStudentAttributes,
@@ -11,10 +12,6 @@ import User from "@/models/User";
 
 function normalizeText(value) {
   return String(value || "").trim();
-}
-
-function normalizeRole(value) {
-  return normalizeText(value).toLowerCase();
 }
 
 export async function GET(request, context) {
@@ -32,10 +29,7 @@ export async function GET(request, context) {
   await connectToDatabase();
 
   const admin = await User.findById(adminId).lean();
-  if (
-    !admin ||
-    !["admin", "recruiter"].includes(normalizeRole(admin.role))
-  ) {
+  if (!admin || !isAdminRole(admin.role)) {
     return new Response("Unauthorized", { status: 403 });
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { APP_ROLES, isAdminRole } from "@/lib/authRoles";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,12 +11,14 @@ import {
   GiftIcon,
   ChartBarIcon,
   UserIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/outline";
 
 const studentNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
   { href: "/jobs", label: "Job Postings", icon: BriefcaseIcon },
   { href: "/applications", label: "Applications", icon: DocumentTextIcon },
+  { href: "/interviews", label: "Interviews", icon: CalendarIcon },
   { href: "/offers", label: "Offers", icon: GiftIcon },
   { href: "/analytics", label: "Placement Analytics", icon: ChartBarIcon },
   { href: "/profile", label: "Profile", icon: UserIcon },
@@ -23,33 +26,34 @@ const studentNavItems = [
 
 const adminNavItems = [
   { href: "/admin/jobs", label: "Create Jobs", icon: BriefcaseIcon },
-];
-
-const recruiterNavItems = [
-  { href: "/recruiter/jobs", label: "Create Jobs", icon: BriefcaseIcon },
+  {
+    href: "/admin/applications",
+    label: "Manage Applications",
+    icon: DocumentTextIcon,
+  },
+  { href: "/interviews", label: "Interviews", icon: CalendarIcon },
+  { href: "/analytics", label: "Placement Analytics", icon: ChartBarIcon },
 ];
 
 export default function SideBar() {
   const pathname = usePathname();
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState(APP_ROLES.STUDENT);
 
   useEffect(() => {
     const readRole = () => {
       try {
         const rawUser = localStorage.getItem("auth_user");
         if (!rawUser) {
-          setRole("student");
+          setRole(APP_ROLES.STUDENT);
           return;
         }
 
         const parsedUser = JSON.parse(rawUser);
         setRole(
-          parsedUser?.role === "admin" || parsedUser?.role === "recruiter"
-            ? parsedUser.role
-            : "student",
+          isAdminRole(parsedUser?.role) ? APP_ROLES.ADMIN : APP_ROLES.STUDENT,
         );
       } catch {
-        setRole("student");
+        setRole(APP_ROLES.STUDENT);
       }
     };
 
@@ -63,12 +67,7 @@ export default function SideBar() {
     };
   }, []);
 
-  const navItems =
-    role === "admin"
-      ? adminNavItems
-      : role === "recruiter"
-        ? recruiterNavItems
-        : studentNavItems;
+  const navItems = role === APP_ROLES.ADMIN ? adminNavItems : studentNavItems;
 
   return (
     <nav className="h-full bg-gray-900/95 md:group-hover/sidebar:bg-gray-900/60 backdrop-blur-md text-white shadow-2xl flex flex-col transition-colors duration-300">

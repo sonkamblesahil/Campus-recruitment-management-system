@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { APP_ROLES, normalizeRole } from "@/lib/authRoles";
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,9 +21,10 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "recruiter", "student"],
+      enum: [APP_ROLES.ADMIN, APP_ROLES.STUDENT],
+      set: normalizeRole,
       required: true,
-      default: "student",
+      default: APP_ROLES.STUDENT,
       lowercase: true,
       trim: true,
     },

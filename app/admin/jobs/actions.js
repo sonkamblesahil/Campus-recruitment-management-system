@@ -1,6 +1,7 @@
 "use server";
 
 import mongoose from "mongoose";
+import { isAdminRole } from "@/lib/authRoles";
 import { connectToDatabase } from "@/lib/mongodb";
 import {
   getStudentAttributes,
@@ -14,8 +15,21 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
-function normalizeRole(value) {
-  return normalizeText(value).toLowerCase();
+function parseBoolean(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  const normalized = normalizeText(value).toLowerCase();
+  if (normalized === "true") {
+    return true;
+  }
+
+  if (normalized === "false") {
+    return false;
+  }
+
+  return null;
 }
 
 function toNumber(value) {
@@ -35,14 +49,14 @@ function normalizeDepartments(value) {
     .filter(Boolean);
 }
 
-async function requireAdminOrRecruiter(userId) {
+async function requireAdmin(userId) {
   const normalizedUserId = normalizeText(userId);
   if (!mongoose.Types.ObjectId.isValid(normalizedUserId)) {
     return { success: false, error: "Invalid user ID" };
   }
 
   const user = await User.findById(normalizedUserId).lean();
-  if (!user || !["admin", "recruiter"].includes(normalizeRole(user.role))) {
+  if (!user || !isAdminRole(user.role)) {
     return { success: false, error: "Unauthorized" };
   }
 
@@ -89,7 +103,7 @@ function mapJob(job) {
 export async function createJobAction(userId, payload) {
   await connectToDatabase();
 
-  const adminResult = await requireAdminOrRecruiter(userId);
+  const adminResult = await requireAdmin(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -111,7 +125,7 @@ export async function createJobAction(userId, payload) {
 export async function updateJobAction(userId, jobId, payload) {
   await connectToDatabase();
 
-  const adminResult = await requireAdminOrRecruiter(userId);
+  const adminResult = await requireAdmin(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -149,7 +163,7 @@ export async function updateJobAction(userId, jobId, payload) {
 export async function getAdminJobsAction(userId) {
   await connectToDatabase();
 
-  const adminResult = await requireAdminOrRecruiter(userId);
+  const adminResult = await requireAdmin(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -164,7 +178,7 @@ export async function getAdminJobsAction(userId) {
 export async function getEligibleStudentsForJobAction(userId, jobId) {
   await connectToDatabase();
 
-  const adminResult = await requireAdminOrRecruiter(userId);
+  const adminResult = await requireAdmin(userId);
   if (!adminResult.success) {
     return adminResult;
   }
@@ -212,4 +226,37 @@ export async function getEligibleStudentsForJobAction(userId, jobId) {
     .filter(Boolean);
 
   return { success: true, data: eligible };
+}
+
+export async function updateJobActiveStatusAction(userId, jobId, nextActive) {
+  await connectToDatabase();
+
+  const adminResult = await requireAdmin(userId);
+  if (!adminResult.success) {
+    return adminResult;
+  }
+
+  const normalizedJobId = normalizeText(jobId);
+  if (!mongoose.Types.ObjectId.isValid(normalizedJobId)) {
+    return { success: false, error: "Invalid job" };
+  }
+
+  const parsedStatus = parseBoolean(nextActive);
+  if (parsedStatus === null) {
+    return { success: false, error: "Invalid status" };
+  }
+
+  const job = await Job.findById(normalizedJobId);
+  if (!job) {
+    return { success: false, error: "Job not found" };
+  }
+
+  if (String(job.createdBy) !== adminResult.userId) {
+    return { success: false, error: "You can only update your own jobs" };
+  }
+
+  job.active = parsedStatus;
+  await job.save();
+
+  return { success: true, data: mapJob(job.toObject()) };
 }

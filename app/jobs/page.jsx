@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getEligibleJobsForStudentAction } from "./actions";
+import { useEffect, useMemo, useState } from "react";
+import { getEligibleJobsForStudentAction, applyToJobAction } from "./actions";
 
 export default function JobListingPage() {
   const [authUser] = useState(() => {
@@ -20,6 +20,9 @@ export default function JobListingPage() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [applying, setApplying] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [applicationFilter, setApplicationFilter] = useState("all");
 
   useEffect(() => {
     async function loadJobs() {
@@ -44,6 +47,63 @@ export default function JobListingPage() {
     loadJobs();
   }, [authUser]);
 
+  const handleApply = async () => {
+    if (!authUser?.userId || !activeSelectedJob) return;
+
+    setApplying(true);
+    setMessage("");
+
+    const result = await applyToJobAction(
+      authUser.userId,
+      activeSelectedJob.id,
+    );
+    if (result.success) {
+      // Opt to reflect instantly locally instead of reloading everything
+      setSelectedJob((prev) =>
+        prev ? { ...prev, hasApplied: true } : activeSelectedJob,
+      );
+      setJobs((prevJobs) =>
+        prevJobs.map((j) =>
+          j.id === activeSelectedJob.id ? { ...j, hasApplied: true } : j,
+        ),
+      );
+      setMessage("Application submitted successfully!");
+    } else {
+      setMessage(result.error || "Failed to apply.");
+    }
+    setApplying(false);
+  };
+
+  const filteredJobs = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return jobs.filter((job) => {
+      const filterMatch =
+        applicationFilter === "all" ||
+        (applicationFilter === "applied" && job.hasApplied) ||
+        (applicationFilter === "not-applied" && !job.hasApplied);
+
+      const searchMatch =
+        normalizedSearch === "" ||
+        String(job.title || "")
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        String(job.company || "")
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        String(job.location || "")
+          .toLowerCase()
+          .includes(normalizedSearch);
+
+      return filterMatch && searchMatch;
+    });
+  }, [applicationFilter, jobs, searchTerm]);
+
+  const activeSelectedJob =
+    filteredJobs.find((job) => job.id === selectedJob?.id) ||
+    filteredJobs[0] ||
+    null;
+
   if (loading) {
     return <div className="p-4 text-sm text-zinc-600">Loading jobs...</div>;
   }
@@ -66,13 +126,34 @@ export default function JobListingPage() {
         <div className="w-1/3 bg-white rounded-2xl p-2 overflow-y-auto">
           <h2 className="text-zinc-600 text-sm font-bold mb-2">Job Openings</h2>
 
-          {jobs.length === 0 ? (
+          <div className="space-y-2 mb-3">
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by title, company, location"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <select
+              value={applicationFilter}
+              onChange={(event) => setApplicationFilter(event.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="all">All Jobs</option>
+              <option value="not-applied">Not Applied</option>
+              <option value="applied">Applied</option>
+            </select>
+            <p className="text-xs text-zinc-500">
+              Showing {filteredJobs.length} of {jobs.length} jobs
+            </p>
+          </div>
+
+          {filteredJobs.length === 0 ? (
             <p className="text-sm text-zinc-500">
-              No jobs match your profile right now.
+              No jobs found for the selected filters.
             </p>
           ) : (
             <div className="space-y-2">
-              {jobs.map((job) => (
+              {filteredJobs.map((job) => (
                 <div
                   key={job.id}
                   onClick={() => setSelectedJob(job)}
@@ -97,7 +178,7 @@ export default function JobListingPage() {
 
         {/* ================= RIGHT: JOB DETAILS ================= */}
         <div className="w-2/3 bg-white rounded-2xl p-4 flex flex-col">
-          {!selectedJob ? (
+          {!activeSelectedJob ? (
             <div className="flex-1 flex items-center justify-center text-zinc-400 text-sm">
               Select a job to view full details
             </div>
@@ -106,13 +187,13 @@ export default function JobListingPage() {
               <div className="flex-1 overflow-y-auto space-y-4">
                 <div>
                   <h2 className="text-lg font-bold text-zinc-700">
-                    {selectedJob.title}
+                    {activeSelectedJob.title}
                   </h2>
                   <p className="text-sm text-zinc-600">
-                    {selectedJob.company} • {selectedJob.location}
+                    {activeSelectedJob.company} • {activeSelectedJob.location}
                   </p>
                   <p className="text-sm text-zinc-600">
-                    Package: {selectedJob.packageCtc}
+                    Package: {activeSelectedJob.packageCtc}
                   </p>
                 </div>
 
@@ -121,7 +202,7 @@ export default function JobListingPage() {
                     Job Description
                   </h3>
                   <p className="text-sm text-zinc-600">
-                    {selectedJob.description}
+                    {activeSelectedJob.description}
                   </p>
                 </div>
 
@@ -129,27 +210,43 @@ export default function JobListingPage() {
                   <h3 className="font-semibold text-zinc-700">Eligibility</h3>
                   <p className="text-sm text-zinc-600">
                     Departments:{" "}
-                    {selectedJob.eligibility?.departments?.join(", ") || "Any"}
+                    {activeSelectedJob.eligibility?.departments?.join(", ") ||
+                      "Any"}
                   </p>
                   <p className="text-sm text-zinc-600">
-                    Min CGPA: {selectedJob.eligibility?.minCgpa ?? "N/A"}
+                    Min CGPA: {activeSelectedJob.eligibility?.minCgpa ?? "N/A"}
                   </p>
                   <p className="text-sm text-zinc-600">
                     Min 12th %:{" "}
-                    {selectedJob.eligibility?.minClass12Percentage ?? "N/A"}
+                    {activeSelectedJob.eligibility?.minClass12Percentage ??
+                      "N/A"}
                   </p>
                   <p className="text-sm text-zinc-600">
                     Semester Range:{" "}
-                    {selectedJob.eligibility?.minSemester ?? "N/A"} -{" "}
-                    {selectedJob.eligibility?.maxSemester ?? "N/A"}
+                    {activeSelectedJob.eligibility?.minSemester ?? "N/A"} -{" "}
+                    {activeSelectedJob.eligibility?.maxSemester ?? "N/A"}
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-3 mt-4">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                  Apply
+                <button
+                  onClick={handleApply}
+                  disabled={applying || activeSelectedJob.hasApplied}
+                  className={`px-4 py-2 rounded-lg text-sm text-white ${
+                    activeSelectedJob.hasApplied
+                      ? "bg-green-600 cursor-not-allowed"
+                      : applying
+                        ? "bg-blue-400 cursor-wait"
+                        : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {activeSelectedJob.hasApplied
+                    ? "Applied"
+                    : applying
+                      ? "Applying..."
+                      : "Apply"}
                 </button>
               </div>
             </>

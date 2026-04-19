@@ -1,5 +1,6 @@
 "use client";
 
+import { normalizeRole } from "@/lib/authRoles";
 import { Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -44,7 +45,7 @@ export default function NavBar({ onMenuClick }) {
         const parsedUser = JSON.parse(rawUser);
         setUser({
           name: parsedUser?.name || "User",
-          role: parsedUser?.role || "student",
+          role: normalizeRole(parsedUser?.role) || "student",
         });
       } catch {
         setUser({ name: "User", role: "Student" });

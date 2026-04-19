@@ -1,10 +1,12 @@
 "use client";
 
+import { isAdminRole } from "@/lib/authRoles";
 import { useEffect, useMemo, useState } from "react";
 import {
   createJobAction,
   getAdminJobsAction,
   getEligibleStudentsForJobAction,
+  updateJobActiveStatusAction,
   updateJobAction,
 } from "./actions";
 
@@ -73,7 +75,17 @@ export default function AdminJobsPage() {
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [form, setForm] = useState(emptyForm);
+
+  const activeJobCount = useMemo(
+    () => jobs.filter((job) => job.active).length,
+    [jobs],
+  );
+  const inactiveJobCount = useMemo(
+    () => jobs.filter((job) => !job.active).length,
+    [jobs],
+  );
 
   const selectedJob = useMemo(
     () => jobs.find((job) => job.id === selectedJobId) || null,
@@ -95,10 +107,7 @@ export default function AdminJobsPage() {
   }
 
   useEffect(() => {
-    if (
-      !authUser?.userId ||
-      !["admin", "recruiter"].includes(authUser.role || "")
-    ) {
+    if (!authUser?.userId || !isAdminRole(authUser.role || "")) {
       return;
     }
 
@@ -113,7 +122,7 @@ export default function AdminJobsPage() {
     return <div className="p-4 text-sm text-zinc-600">Loading...</div>;
   }
 
-  if (!["admin", "recruiter"].includes(authUser.role || "")) {
+  if (!isAdminRole(authUser.role || "")) {
     return (
       <div className="p-4 text-sm text-red-600">
         You are not allowed to access this page.
@@ -190,13 +199,52 @@ export default function AdminJobsPage() {
     setLoadingStudents(false);
   };
 
+  const handleUpdateJobStatus = async (nextStatus) => {
+    if (!selectedJobId) {
+      setError("Select a job first");
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setUpdatingStatus(true);
+
+    const result = await updateJobActiveStatusAction(
+      authUser.userId,
+      selectedJobId,
+      nextStatus,
+    );
+
+    if (!result?.success) {
+      setError(result?.error || "Failed to update job status");
+      setUpdatingStatus(false);
+      return;
+    }
+
+    setJobs((prevJobs) =>
+      prevJobs.map((job) => (job.id === selectedJobId ? result.data : job)),
+    );
+    setMessage(nextStatus ? "Job activated." : "Job deactivated.");
+    setUpdatingStatus(false);
+  };
+
   return (
     <div className="h-full p-3 rounded-2xl">
-      <h1 className="text-zinc-700 text-lg font-bold">
-        {authUser.role === "recruiter"
-          ? "Recruiter Job Management"
-          : "Admin Job Management"}
-      </h1>
+      <h1 className="text-zinc-700 text-lg font-bold">Admin Job Management</h1>
+      <div className="mt-2 grid grid-cols-3 gap-2 max-w-md">
+        <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <p className="text-zinc-500">Total Jobs</p>
+          <p className="font-semibold text-zinc-700">{jobs.length}</p>
+        </div>
+        <div className="bg-white border border-green-200 rounded-lg px-3 py-2 text-sm">
+          <p className="text-green-600">Active</p>
+          <p className="font-semibold text-green-700">{activeJobCount}</p>
+        </div>
+        <div className="bg-white border border-red-200 rounded-lg px-3 py-2 text-sm">
+          <p className="text-red-600">Inactive</p>
+          <p className="font-semibold text-red-700">{inactiveJobCount}</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-[82vh] mt-3">
         <section className="bg-white rounded-2xl p-3 overflow-y-auto">
@@ -225,9 +273,20 @@ export default function AdminJobsPage() {
                       : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                   }`}
                 >
-                  <p className="text-sm font-semibold text-zinc-700">
-                    {job.title}
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-zinc-700">
+                      {job.title}
+                    </p>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                        job.active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {job.active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
                   <p className="text-xs text-zinc-500">{job.company}</p>
                 </button>
               ))}
@@ -376,6 +435,26 @@ export default function AdminJobsPage() {
                 className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm disabled:bg-emerald-300"
               >
                 {loadingStudents ? "Loading..." : "Get Eligible Students"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateJobStatus(false)}
+                disabled={
+                  updatingStatus || !selectedJobId || !selectedJob?.active
+                }
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm disabled:bg-red-300"
+              >
+                {updatingStatus ? "Updating..." : "Deactivate Job"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateJobStatus(true)}
+                disabled={
+                  updatingStatus || !selectedJobId || selectedJob?.active
+                }
+                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm disabled:bg-green-300"
+              >
+                {updatingStatus ? "Updating..." : "Activate Job"}
               </button>
               <a
                 href={
