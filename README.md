@@ -59,7 +59,7 @@ High-level folders:
 - components/: shared UI shell and navigation
 - lib/: auth role helpers, MongoDB connection, eligibility logic
 - models/: Mongoose schemas
-- data/: static data (legacy/demo)
+- data/: runtime data modules
 - public/: static assets
 
 Important files:

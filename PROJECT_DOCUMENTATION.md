@@ -73,7 +73,6 @@ data/
   applications.js
   jobs.js
   offers.js
-  sampleData.js
 
 lib/
   academics.js
