@@ -49,7 +49,7 @@ Core capabilities include:
 - If an admin has an assigned branch, job/application/interview operations are restricted to that branch.
 - Passwords are intentionally stored in plain text in this project (per project requirement).
 - Password reset links are generated in-app and returned from server actions.
-- Superadmin account is auto-seeded/normalized from constants in lib/superAdmin.js.
+- Superadmin account is enforced from constants in lib/superAdmin.js.
 
 ## 4. Repository Structure
 
@@ -177,7 +177,7 @@ Implemented in lib/academics.js:
   - btech: 1-4
   - mtech: 1-2
 
-### 9.4 Superadmin Seed Account
+### 9.4 Superadmin Account
 
 Configured in lib/superAdmin.js and enforced during auth flows:
 

@@ -1,20 +1,12 @@
-export const applications = [
-  {
-    id: 1,
-    company: "Google",
-    position: "Software Engineer",
-    status: "Selected",
-  },
-  {
-    id: 2,
-    company: "Facebook",
-    position: "Data Scientist",
-    status: "Rejected",
-  },
-  {
-    id: 3,
-    company: "Amazon",
-    position: "Product Manager",
-    status: "Pending",
-  },
-];
+import { demoApplications } from "./sampleData.js";
+
+export const applications = demoApplications.map((application, index) => ({
+  id: index + 1,
+  company: application.company,
+  position: application.position,
+  status:
+    application.status === "under-review"
+      ? "Under Review"
+      : application.status.charAt(0).toUpperCase() +
+        application.status.slice(1),
+}));

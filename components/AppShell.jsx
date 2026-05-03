@@ -193,7 +193,7 @@ export default function AppShell({ children }) {
         ) : null}
 
         <aside
-          className={`group/sidebar fixed md:static left-0 ${sidebarTopOffsetClass} md:h-auto w-58 md:w-20 md:hover:w-58 overflow-hidden border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
+          className={`group/sidebar fixed md:static left-0 ${sidebarTopOffsetClass} md:h-auto w-64 md:w-20 md:hover:w-68 overflow-hidden border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}
         >
