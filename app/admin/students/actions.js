@@ -105,13 +105,43 @@ export async function verifyStudentProfileAction(adminId, studentId) {
     return adminResult;
   }
 
-  void studentId;
+  const normalizedStudentId = normalizeText(studentId);
+  if (!mongoose.Types.ObjectId.isValid(normalizedStudentId)) {
+    return { success: false, error: "Invalid student ID" };
+  }
 
-  return {
-    success: false,
-    error:
-      "Student detail editing is disabled. Admin has read-only access to student details.",
-  };
+  const assignedBranch = normalizeBranch(adminResult.user?.branch);
+  if (!BRANCH_VALUES.includes(assignedBranch)) {
+    return {
+      success: false,
+      error:
+        "No department assigned to this admin. Ask superadmin to assign a branch.",
+    };
+  }
+
+  const student = await User.findOne({
+    _id: normalizedStudentId,
+    role: APP_ROLES.STUDENT,
+    branch: assignedBranch,
+  });
+
+  if (!student) {
+    return {
+      success: false,
+      error: "Student not found for this department",
+    };
+  }
+
+  if (student.isProfileVerified) {
+    return { success: true, message: "Student profile is already verified" };
+  }
+
+  student.isProfileVerified = true;
+  student.profileVerifiedAt = new Date();
+  student.profileVerifiedBy = adminResult.user._id;
+  await student.save();
+
+  return { success: true };
 }
 
 export async function getAdminDepartmentStudentsAction(adminId, filters = {}) {

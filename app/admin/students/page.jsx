@@ -3,7 +3,10 @@
 import { PROGRAM_OPTIONS } from "@/lib/academics";
 import { isAdminRole } from "@/lib/authRoles";
 import { useEffect, useState } from "react";
-import { getAdminDepartmentStudentsAction } from "./actions";
+import {
+  getAdminDepartmentStudentsAction,
+  verifyStudentProfileAction,
+} from "./actions";
 
 export default function AdminDepartmentStudentsPage() {
   const [authUser] = useState(() => {
@@ -31,6 +34,33 @@ export default function AdminDepartmentStudentsPage() {
   const [maxCgpa, setMaxCgpa] = useState("");
   const [minClass12, setMinClass12] = useState("");
   const [maxClass12, setMaxClass12] = useState("");
+
+  const handleVerifyStudent = async (studentId) => {
+    if (!authUser?.userId) {
+      setError("Unauthorized");
+      return;
+    }
+
+    setError("");
+    const result = await verifyStudentProfileAction(authUser.userId, studentId);
+
+    if (!result?.success) {
+      setError(result?.error || "Failed to verify student profile");
+      return;
+    }
+
+    setStudents((prev) =>
+      prev.map((student) =>
+        student.id === studentId
+          ? {
+              ...student,
+              isProfileVerified: true,
+              profileVerifiedAt: new Date().toISOString(),
+            }
+          : student,
+      ),
+    );
+  };
 
   useEffect(() => {
     if (!authUser?.userId || !isAdminRole(authUser.role || "")) {
@@ -90,7 +120,7 @@ export default function AdminDepartmentStudentsPage() {
         Department Student Directory
       </h1>
       <p className="text-xs text-zinc-500 mb-1">
-        Student details are read-only in this view.
+        Student details are view-only here, but admins can verify profiles.
       </p>
       <p className="text-xs text-zinc-600 mb-3">
         {departmentLabel
@@ -267,9 +297,18 @@ export default function AdminDepartmentStudentsPage() {
                           Verified
                         </span>
                       ) : (
-                        <span className="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-700 inline-flex w-fit">
-                          Not Verified
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-700 inline-flex w-fit">
+                            Not Verified
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleVerifyStudent(student.id)}
+                            className="px-2 py-1 rounded-full text-xs bg-zinc-800 text-white inline-flex w-fit hover:bg-zinc-700"
+                          >
+                            Verify Profile
+                          </button>
+                        </div>
                       )}
                     </div>
                   </td>
