@@ -143,13 +143,15 @@ export default function AdminApplicationsPage() {
   }
 
   return (
-    <div className="h-full p-2 relative">
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-zinc-700 text-lg font-bold">
-          Applications & Offers
-        </h1>
+    <div className="min-h-[82vh] p-2 sm:p-3 md:p-4 bg-gray-50">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 sm:mb-4">
+        <div>
+          <h1 className="text-sm sm:text-base md:text-lg font-bold text-zinc-800">
+            Applications & Offers
+          </h1>
+        </div>
         <select
-          className="p-1 px-3 text-sm border rounded"
+          className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg w-full sm:w-auto"
           value={selectedJob}
           onChange={(e) => setSelectedJob(e.target.value)}
         >
@@ -162,96 +164,204 @@ export default function AdminApplicationsPage() {
         </select>
       </div>
 
-      {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+      {error && <p className="text-red-600 text-xs sm:text-sm mb-3">{error}</p>}
 
-      <div className="h-[80vh] bg-white rounded-lg p-2 overflow-auto shadow">
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-2 sm:space-y-3">
         {loading ? (
-          <p className="p-4 text-gray-500">Loading...</p>
+          <p className="p-4 text-xs sm:text-sm text-gray-500 bg-white rounded-lg">
+            Loading...
+          </p>
         ) : applications.length === 0 ? (
-          <p className="p-4 text-gray-500">No applications found.</p>
+          <p className="p-4 text-xs sm:text-sm text-gray-500 bg-white rounded-lg">
+            No applications found.
+          </p>
         ) : (
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-100 text-gray-600 sticky top-0">
-              <tr>
-                <th className="p-3">Applicant</th>
-                <th className="p-3">Job / Company</th>
-                <th className="p-3">Date</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Update Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((app) => (
-                <tr key={app.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">
-                    <div className="font-semibold text-gray-800">
-                      {app.student?.name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {app.student?.email}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <div className="font-semibold">{app.job?.title}</div>
-                    <div className="text-xs text-gray-500">
-                      {app.job?.company}
-                    </div>
-                  </td>
-                  <td className="p-3 text-gray-600">{app.appliedAt}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-bold ${
-                        app.status === "selected"
-                          ? "bg-green-100 text-green-800"
-                          : app.status === "rejected"
-                            ? "bg-red-100 text-red-800"
-                            : app.status === "shortlisted"
-                              ? "bg-purple-100 text-purple-800"
-                              : app.status === "under-review"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
-                      {app.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <select
-                      className="border p-1 text-xs rounded text-gray-700 w-full max-w-30 focus:ring focus:ring-blue-500"
-                      value={app.status}
-                      onChange={(e) =>
-                        handleStatusChange(app.id, e.target.value)
-                      }
-                    >
-                      <option value="applied">Applied</option>
-                      <option value="under-review">Under Review</option>
-                      <option value="shortlisted">Shortlisted</option>
-                      <option value="selected">Selected (Offer)</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                    {app.status === "shortlisted" && (
-                      <button
-                        onClick={() =>
-                          setInterviewModal({
-                            open: true,
-                            app,
-                            title: "",
-                            scheduledDate: "",
-                            meetingLink: "",
-                            instructions: "",
-                          })
-                        }
-                        className="ml-2 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-                      >
-                        Schedule Interview
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          applications.map((app) => (
+            <div
+              key={app.id}
+              className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3"
+            >
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500">Applicant</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
+                    {app.student?.name}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {app.student?.email}
+                  </p>
+                </div>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                    app.status === "selected"
+                      ? "bg-green-100 text-green-800"
+                      : app.status === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : app.status === "shortlisted"
+                          ? "bg-purple-100 text-purple-800"
+                          : app.status === "under-review"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  {app.status.toUpperCase()}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-xs text-gray-500">Job / Company</p>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-800 truncate">
+                    {app.job?.title}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {app.job?.company}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Applied</p>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    {app.appliedAt}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <select
+                  className="flex-1 border border-gray-300 p-1.5 sm:p-2 text-xs sm:text-sm rounded bg-white focus:ring-2 focus:ring-blue-500"
+                  value={app.status}
+                  onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                >
+                  <option value="applied">Applied</option>
+                  <option value="under-review">Under Review</option>
+                  <option value="shortlisted">Shortlisted</option>
+                  <option value="selected">Selected (Offer)</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                {app.status === "shortlisted" && (
+                  <button
+                    onClick={() =>
+                      setInterviewModal({
+                        open: true,
+                        app,
+                        title: "",
+                        scheduledDate: "",
+                        meetingLink: "",
+                        instructions: "",
+                      })
+                    }
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Schedule
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
         )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto max-h-[75vh]">
+          {loading ? (
+            <p className="p-4 text-sm text-gray-500">Loading...</p>
+          ) : applications.length === 0 ? (
+            <p className="p-4 text-sm text-gray-500">No applications found.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-100 text-gray-600 sticky top-0">
+                <tr>
+                  <th className="p-3 text-left">Applicant</th>
+                  <th className="p-3 text-left">Job / Company</th>
+                  <th className="p-3 text-left">Date</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Update Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((app) => (
+                  <tr
+                    key={app.id}
+                    className="border-b border-gray-200 hover:bg-gray-50"
+                  >
+                    <td className="p-3">
+                      <div className="font-semibold text-gray-800 text-sm">
+                        {app.student?.name}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {app.student?.email}
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="font-semibold text-sm">
+                        {app.job?.title}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {app.job?.company}
+                      </div>
+                    </td>
+                    <td className="p-3 text-gray-600 text-sm">
+                      {app.appliedAt}
+                    </td>
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-bold ${
+                          app.status === "selected"
+                            ? "bg-green-100 text-green-800"
+                            : app.status === "rejected"
+                              ? "bg-red-100 text-red-800"
+                              : app.status === "shortlisted"
+                                ? "bg-purple-100 text-purple-800"
+                                : app.status === "under-review"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {app.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-2 items-center">
+                        <select
+                          className="border border-gray-300 p-1 text-xs rounded text-gray-700 bg-white focus:ring-2 focus:ring-blue-500"
+                          value={app.status}
+                          onChange={(e) =>
+                            handleStatusChange(app.id, e.target.value)
+                          }
+                        >
+                          <option value="applied">Applied</option>
+                          <option value="under-review">Under Review</option>
+                          <option value="shortlisted">Shortlisted</option>
+                          <option value="selected">Selected (Offer)</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                        {app.status === "shortlisted" && (
+                          <button
+                            onClick={() =>
+                              setInterviewModal({
+                                open: true,
+                                app,
+                                title: "",
+                                scheduledDate: "",
+                                meetingLink: "",
+                                instructions: "",
+                              })
+                            }
+                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                          >
+                            Schedule
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
       {interviewModal?.open && (

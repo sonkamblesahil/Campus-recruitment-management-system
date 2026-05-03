@@ -47,6 +47,11 @@ export default function AppShell({ children }) {
     pathname === "/forgot-password" ||
     pathname === "/reset-password";
 
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   const isAdminPath = pathname.startsWith("/admin");
   const isSuperAdminPath = pathname.startsWith("/superadmin");
   const isAdminSharedPath =
@@ -182,25 +187,25 @@ export default function AppShell({ children }) {
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden gap-0">
         {sidebarOpen ? (
           <button
             type="button"
             aria-label="Close menu overlay"
             onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 bg-black/40 z-20 md:hidden"
+            className="fixed inset-0 bg-black/50 z-20 md:hidden"
           />
         ) : null}
 
         <aside
-          className={`group/sidebar fixed md:static left-0 ${sidebarTopOffsetClass} md:h-auto w-64 md:w-20 md:hover:w-68 overflow-hidden border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
+          className={`group/sidebar fixed md:static left-0 ${sidebarTopOffsetClass} w-64 md:w-20 md:hover:w-64 overflow-y-auto border-r border-gray-700 z-30 transform transition-[transform,width] duration-300 ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}
         >
           <SideBar />
         </aside>
 
-        <main className="flex-1 p-1 md:p-2 overflow-y-auto rounded-xl bg-gray-200">
+        <main className="flex-1 p-2 sm:p-3 md:p-4 overflow-y-auto rounded-t-2xl md:rounded-xl bg-gray-50 md:bg-gray-200">
           {children}
         </main>
       </div>

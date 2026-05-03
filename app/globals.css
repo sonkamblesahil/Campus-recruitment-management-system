@@ -23,6 +23,114 @@
   }
 }
 
+/* ================= Mobile-First Responsive Design ================= */
+
+/* Base body and html setup */
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Base input and form styling for mobile */
+input,
+textarea,
+select {
+  font-size: 16px;
+  /* Prevents iOS auto-zoom on input focus */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="search"],
+textarea,
+select {
+  @apply w-full px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+  @apply transition-all duration-200;
+}
+
+input[type="text"]:disabled,
+input[type="email"]:disabled,
+input[type="password"]:disabled,
+input[type="number"]:disabled,
+input[type="date"]:disabled,
+textarea:disabled,
+select:disabled {
+  @apply bg-gray-100 cursor-not-allowed;
+}
+
+/* Button responsive sizing */
+button {
+  @apply transition-all duration-200;
+}
+
+/* Form container responsive spacing */
+.form-container {
+  @apply space-y-3 sm:space-y-4;
+}
+
+/* Card responsive padding */
+.card {
+  @apply p-3 sm:p-4 lg:p-6 rounded-lg border border-gray-200 bg-white;
+}
+
+.card-lg {
+  @apply p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-200 bg-white;
+}
+
+/* Grid responsive */
+.grid-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4;
+}
+
+.grid-responsive-2 {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
+}
+
+.grid-responsive-4 {
+  @apply grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3;
+}
+
+/* Section responsive spacing */
+.section {
+  @apply space-y-2 sm:space-y-3;
+}
+
+.section-title {
+  @apply text-base sm:text-lg lg:text-xl font-bold;
+}
+
+.section-subtitle {
+  @apply text-xs sm:text-sm text-gray-600;
+}
+
+/* Table responsive */
+.table-responsive {
+  @apply overflow-x-auto;
+}
+
+.table-responsive table {
+  @apply w-full text-xs sm:text-sm;
+}
+
+.table-responsive th,
+.table-responsive td {
+  @apply px-2 sm:px-4 py-2 sm:py-3;
+}
 
 /* ================= Custom Scrollbar ================= */
 

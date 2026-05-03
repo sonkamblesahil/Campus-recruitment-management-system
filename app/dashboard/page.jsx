@@ -108,75 +108,77 @@ export default function DashBoardPage() {
   }
 
   return (
-    <div className="bg-gray-200 h-full p-2">
-      <h1 className="text-zinc-600 text-base font-bold">Welcome {userName}</h1>
+    <div className="bg-gray-50 md:bg-gray-200 h-full p-2 sm:p-3 md:p-2">
+      <h1 className="text-zinc-600 text-sm sm:text-base font-bold">
+        Welcome {userName}
+      </h1>
       {error ? <p className="text-xs text-red-600 mt-1">{error}</p> : null}
 
-      <div className="h-[82vh] gap-2 rounded-2xl flex bg-gray-200 mt-2">
-        <div className="h-full bg-white w-full rounded-xl p-4 overflow-y-auto space-y-4">
-          <h2 className="text-zinc-600 text-base font-bold mb-4">
+      <div className="min-h-[82vh] gap-2 rounded-2xl flex bg-gray-50 md:bg-gray-200 mt-2">
+        <div className="min-h-full bg-white w-full rounded-xl p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4">
+          <h2 className="text-zinc-600 text-sm sm:text-base font-bold mb-3 sm:mb-4">
             Student Placement Overview
           </h2>
 
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-zinc-600 text-sm font-semibold">
+              <h3 className="text-zinc-600 text-xs sm:text-sm font-semibold">
                 Placement Tracker
               </h3>
               <span className="text-xs text-zinc-400">Updated today</span>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 mb-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-xl font-bold text-zinc-800">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-lg sm:text-xl font-bold text-zinc-800">
                   {dashboard.summary.totalApplications}
                 </p>
-                <p className="text-xs text-zinc-500">Applications</p>
+                <p className="text-xs text-zinc-500 mt-1">Applications</p>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-xl font-bold text-blue-600">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-lg sm:text-xl font-bold text-blue-600">
                   {dashboard.summary.shortlisted}
                 </p>
-                <p className="text-xs text-zinc-500">Shortlisted</p>
+                <p className="text-xs text-zinc-500 mt-1">Shortlisted</p>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-xl font-bold text-red-600">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-lg sm:text-xl font-bold text-red-600">
                   {dashboard.summary.rejected}
                 </p>
-                <p className="text-xs text-zinc-500">Rejected</p>
+                <p className="text-xs text-zinc-500 mt-1">Rejected</p>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-xl font-bold text-green-600">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-lg sm:text-xl font-bold text-green-600">
                   {dashboard.summary.selected}
                 </p>
-                <p className="text-xs text-zinc-500">Selected</p>
+                <p className="text-xs text-zinc-500 mt-1">Selected</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-lg font-bold text-amber-600">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-base sm:text-lg font-bold text-amber-600">
                   {dashboard.summary.underReview}
                 </p>
-                <p className="text-xs text-zinc-500">Under Review</p>
+                <p className="text-xs text-zinc-500 mt-1">Under Review</p>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-lg font-bold text-violet-600">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-base sm:text-lg font-bold text-violet-600">
                   {dashboard.summary.offersPending}
                 </p>
-                <p className="text-xs text-zinc-500">Pending Offers</p>
+                <p className="text-xs text-zinc-500 mt-1">Pending Offers</p>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-lg font-bold text-cyan-600">
+              <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3">
+                <p className="text-base sm:text-lg font-bold text-cyan-600">
                   {dashboard.summary.upcomingInterviews}
                 </p>
-                <p className="text-xs text-zinc-500">Upcoming Interviews</p>
+                <p className="text-xs text-zinc-500 mt-1">Interviews</p>
               </div>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <p className="text-sm font-semibold text-zinc-700">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 flex items-center justify-between">
+                <p className="text-xs sm:text-sm font-semibold text-zinc-700">
                   Recent Applications
                 </p>
                 <p className="text-xs text-zinc-400">Status</p>
@@ -184,26 +186,26 @@ export default function DashBoardPage() {
 
               <div className="divide-y divide-gray-100">
                 {dashboard.recentApplications.length === 0 ? (
-                  <div className="px-4 py-6 text-sm text-zinc-500">
+                  <div className="px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-zinc-500">
                     No applications yet. Explore jobs and apply to get started.
                   </div>
                 ) : (
                   dashboard.recentApplications.map((application) => (
                     <div
                       key={application.id}
-                      className="px-4 py-3 flex items-center justify-between"
+                      className="px-3 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
                     >
-                      <div>
-                        <p className="text-sm font-medium text-zinc-700">
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-medium text-zinc-700 truncate">
                           {application.job.company}
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-zinc-400 line-clamp-1">
                           {application.job.title} • Applied{" "}
                           {application.appliedAt}
                         </p>
                       </div>
                       <span
-                        className={`text-xs font-semibold px-2 py-1 rounded-full ${statusPillClass(application.status)}`}
+                        className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${statusPillClass(application.status)}`}
                       >
                         {toStatusLabel(application.status)}
                       </span>
@@ -214,8 +216,8 @@ export default function DashBoardPage() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <p className="text-sm font-semibold text-zinc-700">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 flex items-center justify-between">
+                <p className="text-xs sm:text-sm font-semibold text-zinc-700">
                   Upcoming Interviews
                 </p>
                 <p className="text-xs text-zinc-400">
@@ -224,7 +226,7 @@ export default function DashBoardPage() {
               </div>
 
               {dashboard.upcomingInterviews.length === 0 ? (
-                <div className="px-4 py-6 text-sm text-zinc-500">
+                <div className="px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-zinc-500">
                   No upcoming interviews scheduled.
                 </div>
               ) : (
@@ -232,13 +234,13 @@ export default function DashBoardPage() {
                   {dashboard.upcomingInterviews.map((interview) => (
                     <div
                       key={interview.id}
-                      className="px-4 py-3 flex items-center justify-between gap-3"
+                      className="px-3 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
                     >
-                      <div>
-                        <p className="text-sm font-medium text-zinc-700">
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-medium text-zinc-700 truncate">
                           {interview.title}
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-zinc-400 line-clamp-1">
                           {interview.job.company} • {interview.job.title}
                         </p>
                         <p className="text-xs text-zinc-500 mt-1">
@@ -250,7 +252,7 @@ export default function DashBoardPage() {
                           href={interview.meetingLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs font-medium text-blue-700 underline"
+                          className="text-xs font-medium text-blue-700 hover:text-blue-900 underline whitespace-nowrap"
                         >
                           Join
                         </a>

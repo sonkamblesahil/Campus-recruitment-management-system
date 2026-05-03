@@ -102,10 +102,12 @@ const cloneProfile = (profile) => JSON.parse(JSON.stringify(profile));
 
 function Section({ title, action, children }) {
   return (
-    <div className="space-y-4">
-      <div className="border-b border-gray-200 pb-2 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-gray-700">{title}</h2>
-        {action}
+    <div className="space-y-2 sm:space-y-3 md:space-y-4">
+      <div className="border-b border-gray-200 pb-2 flex items-center justify-between gap-2 sm:gap-3">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-700 line-clamp-2">
+          {title}
+        </h2>
+        <div className="text-xs sm:text-sm">{action}</div>
       </div>
       {children}
     </div>
@@ -121,18 +123,18 @@ function Field({
   placeholder,
 }) {
   return (
-    <label className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-center text-sm">
-      <span className="text-gray-600">{label}</span>
+    <label className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 md:gap-4 items-center text-xs sm:text-sm">
+      <span className="text-gray-600 font-medium">{label}</span>
       {editable ? (
         <input
           type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          className="md:col-span-3 border border-gray-300 rounded px-3 py-2"
+          className="sm:col-span-1 md:col-span-3 text-xs sm:text-sm"
         />
       ) : (
-        <span className="md:col-span-3 text-gray-800 wrap-break-word">
+        <span className="sm:col-span-1 md:col-span-3 text-gray-800 wrap-break-word text-xs sm:text-sm">
           {value || "-"}
         </span>
       )}
@@ -151,13 +153,13 @@ function SelectField({
   const selectedOption = options.find((option) => option.value === value);
 
   return (
-    <label className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-center text-sm">
-      <span className="text-gray-600">{label}</span>
+    <label className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 md:gap-4 items-center text-xs sm:text-sm">
+      <span className="text-gray-600 font-medium">{label}</span>
       {editable ? (
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="md:col-span-3 border border-gray-300 rounded px-3 py-2 bg-white"
+          className="sm:col-span-1 md:col-span-3 text-xs sm:text-sm"
         >
           <option value="">{placeholder}</option>
           {options.map((option) => (
@@ -167,7 +169,7 @@ function SelectField({
           ))}
         </select>
       ) : (
-        <span className="md:col-span-3 text-gray-800 wrap-break-word">
+        <span className="sm:col-span-1 md:col-span-3 text-gray-800 wrap-break-word text-xs sm:text-sm">
           {selectedOption?.label || value || "-"}
         </span>
       )}
@@ -177,18 +179,18 @@ function SelectField({
 
 function TextAreaField({ label, value, onChange, editable, placeholder }) {
   return (
-    <label className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-start text-sm">
-      <span className="text-gray-600 md:pt-2">{label}</span>
+    <label className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 md:gap-4 items-start text-xs sm:text-sm">
+      <span className="text-gray-600 font-medium sm:pt-0 md:pt-2">{label}</span>
       {editable ? (
         <textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="md:col-span-3 border border-gray-300 rounded px-3 py-2"
+          className="sm:col-span-1 md:col-span-3 text-xs sm:text-sm"
         />
       ) : (
-        <span className="md:col-span-3 text-gray-800 whitespace-pre-wrap wrap-break-word">
+        <span className="sm:col-span-1 md:col-span-3 text-gray-800 whitespace-pre-wrap wrap-break-word text-xs sm:text-sm">
           {value || "-"}
         </span>
       )}
@@ -198,13 +200,15 @@ function TextAreaField({ label, value, onChange, editable, placeholder }) {
 
 function Block({ title, editable, onRemove, children }) {
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white space-y-3 relative">
-      {title && <p className="font-medium text-gray-700">{title}</p>}
+    <div className="border border-gray-200 rounded-lg p-2 sm:p-3 md:p-4 bg-white space-y-2 sm:space-y-3 relative">
+      {title && (
+        <p className="font-medium text-xs sm:text-sm text-gray-700">{title}</p>
+      )}
       {editable && (
         <button
           type="button"
           onClick={onRemove}
-          className="absolute top-3 right-3 text-xs text-red-500"
+          className="absolute top-2 sm:top-3 right-2 sm:right-3 text-xs text-red-500 hover:text-red-700 transition-colors"
         >
           Remove
         </button>
@@ -414,49 +418,51 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-gray-200 h-full p-2">
-      <h1 className="text-zinc-600 text-base font-bold mb-2">
+    <div className="bg-gray-50 md:bg-gray-200 h-full p-2 sm:p-3 md:p-2">
+      <h1 className="text-zinc-600 text-sm sm:text-base font-bold mb-2">
         Welcome {profile.basic.name || "User"}
       </h1>
 
       {error && (
-        <p className="mb-2 border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm rounded">
+        <p className="mb-2 border border-red-200 bg-red-50 text-red-700 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded">
           {error}
         </p>
       )}
 
       {message && (
-        <p className="mb-2 border border-green-200 bg-green-50 text-green-700 px-3 py-2 text-sm rounded">
+        <p className="mb-2 border border-green-200 bg-green-50 text-green-700 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded">
           {message}
         </p>
       )}
 
-      <div className="bg-white rounded-xl h-[82vh] flex overflow-hidden mt-2 border border-gray-200">
-        <aside className="w-72 border-r bg-gray-50 p-3 space-y-1 overflow-y-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`w-full text-left px-4 py-3 text-sm rounded-lg ${
-                activeTab === tab.id
-                  ? "bg-indigo-50 text-indigo-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className="bg-white rounded-xl min-h-[82vh] flex flex-col md:flex-row overflow-hidden mt-2 border border-gray-200">
+        <aside className="w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r bg-gray-50 p-2 sm:p-3 space-y-1 overflow-y-auto max-h-48 md:max-h-none">
+          <div className="flex flex-wrap gap-1 md:flex-col md:space-y-1 md:flex-nowrap">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`text-xs sm:text-sm px-2 sm:px-4 py-2 rounded-lg whitespace-nowrap md:whitespace-normal flex-1 md:flex-none md:w-full text-left transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-indigo-50 text-indigo-700 font-medium"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </aside>
 
-        <main className="flex-1 p-5 overflow-y-auto">
-          <div className="mb-4 flex items-center justify-end gap-2">
+        <main className="flex-1 p-3 sm:p-4 md:p-5 overflow-y-auto">
+          <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-end gap-2">
             {isEditing && (
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={saving}
-                className="text-sm px-3 py-1.5 border border-gray-300 rounded text-gray-700"
+                className="w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -466,7 +472,7 @@ export default function ProfilePage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="text-sm px-4 py-1.5 rounded bg-indigo-600 text-white disabled:bg-indigo-400"
+                className="w-full sm:w-auto text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded bg-indigo-600 text-white disabled:bg-indigo-400 hover:bg-indigo-700 transition-colors"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -478,7 +484,7 @@ export default function ProfilePage() {
                   setError("");
                   setIsEditing(true);
                 }}
-                className="text-sm px-4 py-1.5 rounded bg-indigo-600 text-white"
+                className="w-full sm:w-auto text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
               >
                 Edit Profile
               </button>

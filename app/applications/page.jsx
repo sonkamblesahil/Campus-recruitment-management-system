@@ -162,23 +162,25 @@ export default function Applications() {
   }
 
   return (
-    <div className="bg-gray-200 h-full p-2">
-      <h1 className="text-zinc-600 text-base font-bold">Your Applications</h1>
+    <div className="bg-gray-50 md:bg-gray-200 h-full p-2 sm:p-3 md:p-2">
+      <h1 className="text-zinc-600 text-sm sm:text-base font-bold">
+        Your Applications
+      </h1>
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       {message && <p className="text-xs text-green-600 mt-1">{message}</p>}
-      <div className="h-[82vh] rounded-2xl flex bg-white mt-2 overflow-hidden items-start">
-        <div className="w-full h-full p-4 overflow-x-auto">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
+      <div className="min-h-[82vh] rounded-2xl flex bg-white mt-2 overflow-hidden">
+        <div className="w-full h-full p-2 sm:p-3 md:p-4 overflow-y-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 mb-3 sm:mb-4">
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by company or role"
-              className="border border-gray-300 rounded px-3 py-1.5 text-sm min-w-55"
+              placeholder="Search companies..."
+              className="flex-1 min-w-0 border border-gray-300 rounded px-3 py-2 text-xs sm:text-sm"
             />
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="border border-gray-300 rounded px-3 py-1.5 text-sm"
+              className="border border-gray-300 rounded px-3 py-2 text-xs sm:text-sm"
             >
               <option value="all">All Statuses</option>
               <option value="applied">Applied</option>
@@ -190,91 +192,141 @@ export default function Applications() {
             <button
               type="button"
               onClick={handleExportCsv}
-              className="bg-emerald-600 text-white text-sm px-3 py-1.5 rounded hover:bg-emerald-700"
+              className="bg-emerald-600 text-white text-xs sm:text-sm px-3 py-2 rounded hover:bg-emerald-700 transition-colors whitespace-nowrap"
             >
               Export CSV
             </button>
           </div>
 
           {filteredApplications.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-zinc-500 text-sm">
-              No applications found for the selected filters.
+            <div className="flex items-center justify-center min-h-96 text-zinc-500 text-xs sm:text-sm">
+              No applications found.
             </div>
           ) : (
-            <table className="w-full min-w-100 text-left" role="table">
-              <thead>
-                <tr>
-                  <th
-                    className="border-b-2 border-gray-300 p-2"
-                    role="columnheader"
-                  >
-                    Date Applied
-                  </th>
-                  <th
-                    className="border-b-2 border-gray-300 p-2"
-                    role="columnheader"
-                  >
-                    Company
-                  </th>
-                  <th
-                    className="border-b-2 border-gray-300 p-2"
-                    role="columnheader"
-                  >
-                    Position
-                  </th>
-                  <th
-                    className="border-b-2 border-gray-300 p-2"
-                    role="columnheader"
-                  >
-                    Status
-                  </th>
-                  <th
-                    className="border-b-2 border-gray-300 p-2"
-                    role="columnheader"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+            <>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-2">
                 {filteredApplications.map((app) => (
-                  <tr key={app.id} role="row">
-                    <td className="border-b border-gray-300 p-2 text-sm text-zinc-600">
-                      {app.appliedAt}
-                    </td>
-                    <td className="border-b border-gray-300 p-2 font-medium">
-                      {app.job?.company || "Unknown Company"}
-                    </td>
-                    <td className="border-b border-gray-300 p-2 text-sm text-zinc-700">
-                      {app.job?.title || "Unknown Position"}
-                    </td>
-                    <td className="border-b border-gray-300 p-2">
+                  <div
+                    key={app.id}
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-xs sm:text-sm text-zinc-700 truncate">
+                          {app.job?.company || "Unknown Company"}
+                        </p>
+                        <p className="text-xs text-zinc-600 truncate">
+                          {app.job?.title || "Unknown Position"}
+                        </p>
+                      </div>
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(app.status)}`}
+                        className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${getStatusBadge(app.status)}`}
                       >
                         {getStatusLabel(app.status)}
                       </span>
-                    </td>
-                    <td className="border-b border-gray-300 p-2">
-                      {canWithdraw(app.status) ? (
-                        <button
-                          type="button"
-                          onClick={() => handleWithdraw(app.id)}
-                          disabled={withdrawingId === app.id}
-                          className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-60"
-                        >
-                          {withdrawingId === app.id
-                            ? "Withdrawing..."
-                            : "Withdraw"}
-                        </button>
-                      ) : (
-                        <span className="text-xs text-zinc-400">No action</span>
-                      )}
-                    </td>
-                  </tr>
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      Applied: {app.appliedAt}
+                    </p>
+                    {canWithdraw(app.status) && (
+                      <button
+                        type="button"
+                        onClick={() => handleWithdraw(app.id)}
+                        disabled={withdrawingId === app.id}
+                        className="w-full px-2 py-1.5 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-60 transition-colors"
+                      >
+                        {withdrawingId === app.id
+                          ? "Withdrawing..."
+                          : "Withdraw"}
+                      </button>
+                    )}
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-sm" role="table">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300">
+                      <th
+                        className="p-3 font-semibold text-zinc-700"
+                        role="columnheader"
+                      >
+                        Date Applied
+                      </th>
+                      <th
+                        className="p-3 font-semibold text-zinc-700"
+                        role="columnheader"
+                      >
+                        Company
+                      </th>
+                      <th
+                        className="p-3 font-semibold text-zinc-700"
+                        role="columnheader"
+                      >
+                        Position
+                      </th>
+                      <th
+                        className="p-3 font-semibold text-zinc-700"
+                        role="columnheader"
+                      >
+                        Status
+                      </th>
+                      <th
+                        className="p-3 font-semibold text-zinc-700"
+                        role="columnheader"
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredApplications.map((app) => (
+                      <tr
+                        key={app.id}
+                        className="border-b border-gray-200 hover:bg-gray-50"
+                        role="row"
+                      >
+                        <td className="p-3 text-zinc-600">{app.appliedAt}</td>
+                        <td className="p-3 font-medium text-zinc-700">
+                          {app.job?.company || "Unknown Company"}
+                        </td>
+                        <td className="p-3 text-zinc-700">
+                          {app.job?.title || "Unknown Position"}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(app.status)}`}
+                          >
+                            {getStatusLabel(app.status)}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          {canWithdraw(app.status) ? (
+                            <button
+                              type="button"
+                              onClick={() => handleWithdraw(app.id)}
+                              disabled={withdrawingId === app.id}
+                              className="px-3 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-60 transition-colors"
+                            >
+                              {withdrawingId === app.id
+                                ? "Withdrawing..."
+                                : "Withdraw"}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-zinc-400">
+                              No action
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

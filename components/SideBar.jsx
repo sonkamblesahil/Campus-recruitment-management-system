@@ -118,22 +118,22 @@ export default function SideBar() {
 
   return (
     <nav className="h-full bg-gray-900/95 md:group-hover/sidebar:bg-gray-900/60 backdrop-blur-md text-white shadow-2xl flex flex-col transition-colors duration-300">
-      <ul className="flex-1 p-3 space-y-4 mt-10">
+      <ul className="flex-1 p-2 sm:p-3 space-y-2 sm:space-y-4 mt-10">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`group flex items-center justify-center md:justify-start rounded-xl p-3 transition-all duration-200 ease-in-out active:bg-white/20 ${
+                className={`group flex items-center justify-center md:justify-start rounded-xl p-2 sm:p-3 transition-all duration-200 ease-in-out active:bg-white/20 text-xs sm:text-sm md:text-base ${
                   pathname === item.href
                     ? "bg-white text-gray-900"
                     : "text-gray-300 hover:bg-white/15 hover:text-white"
                 }`}
                 title={item.label}
               >
-                <Icon className="h-5 w-5 shrink-0 md:mr-0 md:group-hover/sidebar:mr-3 opacity-80 group-hover:opacity-100 transition-all duration-200" />
-                <span className="font-medium whitespace-nowrap opacity-100 md:opacity-0 md:translate-x-2 md:group-hover/sidebar:opacity-100 md:group-hover/sidebar:translate-x-0 transition-all duration-200">
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 md:mr-0 md:group-hover/sidebar:mr-3 opacity-80 group-hover:opacity-100 transition-all duration-200" />
+                <span className="font-medium whitespace-nowrap opacity-100 md:opacity-0 md:translate-x-2 md:group-hover/sidebar:opacity-100 md:group-hover/sidebar:translate-x-0 transition-all duration-200 text-xs sm:text-sm">
                   {item.label}
                 </span>
               </Link>

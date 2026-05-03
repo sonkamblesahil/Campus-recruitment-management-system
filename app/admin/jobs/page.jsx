@@ -251,33 +251,37 @@ export default function AdminJobsPage() {
   };
 
   return (
-    <div className="h-full p-3 rounded-2xl">
-      <h1 className="text-zinc-700 text-lg font-bold">Admin Job Management</h1>
+    <div className="h-full p-2 sm:p-3 rounded-2xl">
+      <h1 className="text-zinc-700 text-base sm:text-lg font-bold">
+        Admin Job Management
+      </h1>
       <div className="mt-2 grid grid-cols-3 gap-2 max-w-md">
-        <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
-          <p className="text-zinc-500">Total Jobs</p>
+        <div className="bg-white border border-gray-200 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm">
+          <p className="text-zinc-500 text-xs">Total Jobs</p>
           <p className="font-semibold text-zinc-700">{jobs.length}</p>
         </div>
-        <div className="bg-white border border-green-200 rounded-lg px-3 py-2 text-sm">
-          <p className="text-green-600">Active</p>
+        <div className="bg-white border border-green-200 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm">
+          <p className="text-green-600 text-xs">Active</p>
           <p className="font-semibold text-green-700">{activeJobCount}</p>
         </div>
-        <div className="bg-white border border-red-200 rounded-lg px-3 py-2 text-sm">
-          <p className="text-red-600">Inactive</p>
+        <div className="bg-white border border-red-200 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm">
+          <p className="text-red-600 text-xs">Inactive</p>
           <p className="font-semibold text-red-700">{inactiveJobCount}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-[82vh] mt-3">
-        <section className="bg-white rounded-2xl p-3 overflow-y-auto">
-          <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3 min-h-[82vh] mt-2 sm:mt-3">
+        <section className="bg-white rounded-2xl p-2 sm:p-3 overflow-y-auto">
+          <h2 className="text-xs sm:text-sm font-semibold text-zinc-700 mb-2">
             Your Jobs
           </h2>
 
           {loadingJobs ? (
-            <p className="text-sm text-zinc-500">Loading jobs...</p>
+            <p className="text-xs sm:text-sm text-zinc-500">Loading jobs...</p>
           ) : jobs.length === 0 ? (
-            <p className="text-sm text-zinc-500">No jobs created yet.</p>
+            <p className="text-xs sm:text-sm text-zinc-500">
+              No jobs created yet.
+            </p>
           ) : (
             <div className="space-y-2">
               {jobs.map((job) => (
@@ -289,18 +293,18 @@ export default function AdminJobsPage() {
                     setForm(buildFormFromJob(job));
                     setStudents([]);
                   }}
-                  className={`w-full text-left p-3 rounded-lg border transition ${
+                  className={`w-full text-left p-2 sm:p-3 rounded-lg border transition ${
                     selectedJobId === job.id
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-zinc-700">
+                    <p className="text-xs sm:text-sm font-semibold text-zinc-700 truncate">
                       {job.title}
                     </p>
                     <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full whitespace-nowrap ${
                         job.active
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
@@ -309,38 +313,40 @@ export default function AdminJobsPage() {
                       {job.active ? "Active" : "Inactive"}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-500">{job.company}</p>
+                  <p className="text-xs text-zinc-500 truncate">
+                    {job.company}
+                  </p>
                 </button>
               ))}
             </div>
           )}
         </section>
 
-        <section className="bg-white rounded-2xl p-3 overflow-y-auto lg:col-span-2">
-          <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+        <section className="bg-white rounded-2xl p-2 sm:p-3 overflow-y-auto lg:col-span-2">
+          <h2 className="text-xs sm:text-sm font-semibold text-zinc-700 mb-2">
             {selectedJobId ? "Update Job" : "Create Job"}
           </h2>
 
           {error ? (
-            <p className="mb-2 text-sm text-red-600 border border-red-200 bg-red-50 px-3 py-2 rounded-lg">
+            <p className="mb-2 text-xs sm:text-sm text-red-600 border border-red-200 bg-red-50 px-2 sm:px-3 py-2 rounded-lg">
               {error}
             </p>
           ) : null}
 
           {message ? (
-            <p className="mb-2 text-sm text-green-700 border border-green-200 bg-green-50 px-3 py-2 rounded-lg">
+            <p className="mb-2 text-xs sm:text-sm text-green-700 border border-green-200 bg-green-50 px-2 sm:px-3 py-2 rounded-lg">
               {message}
             </p>
           ) : null}
 
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
             <input
               placeholder="Job Title"
               value={form.title}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, title: event.target.value }))
               }
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-300 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm"
               required
             />
             <input
@@ -349,7 +355,7 @@ export default function AdminJobsPage() {
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, company: event.target.value }))
               }
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-300 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm"
               required
             />
             <input
@@ -358,7 +364,7 @@ export default function AdminJobsPage() {
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, location: event.target.value }))
               }
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-300 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm"
             />
             <input
               placeholder="Package (e.g. 10 LPA)"
@@ -366,7 +372,7 @@ export default function AdminJobsPage() {
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, packageCtc: event.target.value }))
               }
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-300 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm"
             />
             <textarea
               placeholder="Job Description"
@@ -377,7 +383,7 @@ export default function AdminJobsPage() {
                   description: event.target.value,
                 }))
               }
-              className="md:col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm min-h-24"
+              className="md:col-span-2 border border-gray-300 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm min-h-20 sm:min-h-24"
             />
 
             <input
@@ -394,7 +400,7 @@ export default function AdminJobsPage() {
                 }))
               }
               disabled={Boolean(enforcedBranch)}
-              className="md:col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="md:col-span-2 border border-gray-300 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm"
             />
             <input
               placeholder="Minimum CGPA"
@@ -402,7 +408,7 @@ export default function AdminJobsPage() {
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, minCgpa: event.target.value }))
               }
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm"
             />
             <input
               placeholder="Minimum 12th %"
